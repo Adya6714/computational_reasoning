@@ -10,3 +10,10 @@ venv/
 data/raw/
 data/processed/
 experiments/*/outputs/
+
+# Next.js site
+web/node_modules/
+web/.next/
+web/out/
+web/.env*
+web/.vercel/
