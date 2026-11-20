@@ -46,11 +46,12 @@ export default function HomePage() {
         <motion.div
           className="ambient"
           style={{
-            width: 320,
-            height: 320,
-            top: "12%",
-            right: "8%",
-            background: "var(--accent)",
+            width: 340,
+            height: 340,
+            top: "10%",
+            right: "6%",
+            background: "var(--sky)",
+            opacity: 0.35,
           }}
           animate={{ x: [0, 18, 0], y: [0, 12, 0] }}
           transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
@@ -58,15 +59,28 @@ export default function HomePage() {
         <motion.div
           className="ambient"
           style={{
-            width: 240,
-            height: 240,
-            bottom: "18%",
-            left: "6%",
-            background: "var(--teal)",
-            opacity: 0.14,
+            width: 260,
+            height: 260,
+            bottom: "16%",
+            left: "4%",
+            background: "var(--mint)",
+            opacity: 0.28,
           }}
           animate={{ x: [0, -14, 0], y: [0, -10, 0] }}
           transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="ambient"
+          style={{
+            width: 200,
+            height: 200,
+            top: "55%",
+            right: "28%",
+            background: "var(--coral)",
+            opacity: 0.2,
+          }}
+          animate={{ scale: [1, 1.08, 1] }}
+          transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
         />
         {floats.map((f) => (
           <motion.span

@@ -1,18 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #0a0a0b;
-  --paper: #fafaf8;
-  --muted: #5c5c5a;
-  --rule: rgba(10, 10, 11, 0.1);
-  --tint: rgba(10, 10, 11, 0.02);
-  --tint2: rgba(10, 10, 11, 0.04);
-  --accent: #1b4d8f;
-  --accent-soft: rgba(27, 77, 143, 0.08);
-  --slate: #64748b;
-  --teal: #0f766e;
-  --amber: #b45309;
-  --amber-soft: rgba(180, 83, 9, 0.15);
+  --ink: #142033;
+  --paper: #f5fbff;
+  --muted: #4a5d73;
+  --rule: rgba(20, 32, 51, 0.1);
+  --tint: rgba(77, 163, 255, 0.07);
+  --tint2: rgba(61, 220, 151, 0.1);
+  --accent: #2b7fff;
+  --accent-soft: rgba(43, 127, 255, 0.14);
+  --slate: #5b6f88;
+  --teal: #00c2a8;
+  --amber: #ffb020;
+  --amber-soft: rgba(255, 176, 32, 0.18);
+  --coral: #ff6b4a;
+  --coral-soft: rgba(255, 107, 74, 0.14);
+  --mint: #3ddc97;
+  --mint-soft: rgba(61, 220, 151, 0.14);
+  --sky: #4da3ff;
+  --sun: #ffe566;
   --serif: var(--font-instrument), "Source Serif 4", Georgia, serif;
   --sans: var(--font-inter), system-ui, sans-serif;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -22,20 +28,21 @@
   --foreground: var(--ink);
 }
 
+/* Stay bright — no dark theme override */
 @media (prefers-color-scheme: dark) {
   :root {
-    --ink: #f2f1ee;
-    --paper: #0e0e10;
-    --muted: #a8a8a4;
-    --rule: rgba(242, 241, 238, 0.14);
-    --tint: rgba(242, 241, 238, 0.045);
-    --tint2: rgba(242, 241, 238, 0.08);
-    --accent: #6ba3e0;
-    --accent-soft: rgba(107, 163, 224, 0.16);
-    --slate: #94a3b8;
-    --teal: #2dd4bf;
-    --amber: #f59e0b;
-    --amber-soft: rgba(245, 158, 11, 0.18);
+    --ink: #142033;
+    --paper: #f5fbff;
+    --muted: #4a5d73;
+    --rule: rgba(20, 32, 51, 0.1);
+    --tint: rgba(77, 163, 255, 0.07);
+    --tint2: rgba(61, 220, 151, 0.1);
+    --accent: #2b7fff;
+    --accent-soft: rgba(43, 127, 255, 0.14);
+    --slate: #5b6f88;
+    --teal: #00c2a8;
+    --amber: #ffb020;
+    --amber-soft: rgba(255, 176, 32, 0.18);
   }
 }
 
@@ -61,7 +68,7 @@
 
 html {
   scroll-behavior: smooth;
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -78,7 +85,12 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(77, 163, 255, 0.22), transparent 55%),
+    radial-gradient(900px 500px at 95% 5%, rgba(61, 220, 151, 0.18), transparent 50%),
+    radial-gradient(800px 480px at 80% 90%, rgba(255, 107, 74, 0.12), transparent 55%),
+    radial-gradient(700px 420px at 15% 85%, rgba(255, 229, 102, 0.16), transparent 50%),
+    var(--paper);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 16.5px;
@@ -171,7 +183,7 @@ p {
   justify-content: center;
   gap: 0.12rem;
   z-index: 40;
-  background: linear-gradient(90deg, var(--paper) 65%, transparent);
+  background: linear-gradient(90deg, rgba(245, 251, 255, 0.92) 65%, transparent);
   pointer-events: none;
 }
 
@@ -308,14 +320,6 @@ section.panel > .inner {
   color: #fff;
 }
 
-@media (prefers-color-scheme: dark) {
-  .chip.active,
-  .tab.active,
-  .btn.primary {
-    color: #0a0a0b;
-  }
-}
-
 .btn:disabled,
 .chip:disabled {
   opacity: 0.4;
@@ -323,18 +327,21 @@ section.panel > .inner {
 }
 
 .card {
-  border: 1px solid var(--rule);
-  background: var(--tint);
+  border: 1px solid color-mix(in srgb, var(--sky) 28%, var(--rule));
+  background: color-mix(in srgb, #ffffff 82%, var(--tint));
   padding: 1.05rem 1.15rem;
   transition:
     border-color 0.3s var(--ease),
     box-shadow 0.3s var(--ease),
-    transform 0.3s var(--ease);
+    transform 0.3s var(--ease),
+    background 0.3s var(--ease);
 }
 
 .card:hover {
   border-color: var(--accent);
-  transform: translateY(-1px);
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(43, 127, 255, 0.12);
+  transform: translateY(-2px);
 }
 
 .card.open,
@@ -346,11 +353,17 @@ section.panel > .inner {
 .status-strip {
   margin-top: 1rem;
   padding: 0.65rem 0.85rem;
-  border-left: 2px solid var(--accent);
-  background: var(--tint);
+  border-left: 3px solid var(--coral);
+  background: linear-gradient(
+    90deg,
+    var(--coral-soft),
+    var(--accent-soft) 55%,
+    transparent
+  );
   max-width: 68ch;
   font-size: 0.88rem;
   color: var(--muted);
+  border-radius: 0 12px 12px 0;
 }
 
 .epistemic {
@@ -373,21 +386,22 @@ section.panel > .inner {
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.45;
+  opacity: 0.55;
   pointer-events: none;
   z-index: 0;
   background-image:
-    linear-gradient(to right, var(--rule) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+    linear-gradient(to right, rgba(77, 163, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(61, 220, 151, 0.1) 1px, transparent 1px);
   background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse at 30% 40%, black 20%, transparent 70%);
+  mask-image: radial-gradient(ellipse at 30% 40%, black 25%, transparent 72%);
 }
 
 .shell {
   margin-top: 1.25rem;
-  border: 1px solid var(--rule);
-  background: var(--tint);
+  border: 1px solid color-mix(in srgb, var(--sky) 30%, transparent);
+  background: rgba(255, 255, 255, 0.7);
   overflow: hidden;
+  box-shadow: 0 12px 32px rgba(43, 127, 255, 0.07);
 }
 
 .shell-top {
@@ -554,25 +568,45 @@ section.panel > .inner {
 
 .internals {
   margin-top: 0.5rem;
-  border: 1px solid var(--rule);
-  background: var(--paper);
+  border: 1px solid color-mix(in srgb, var(--sky) 35%, transparent);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(245, 251, 255, 0.9) 40%,
+    rgba(237, 255, 247, 0.85)
+  );
   border-radius: 18px;
   padding: 1.35rem 1.4rem 1.5rem;
   overflow: hidden;
   position: relative;
+  box-shadow: 0 16px 40px rgba(43, 127, 255, 0.08);
 }
 
 .internals::before {
   content: "";
   position: absolute;
-  width: 220px;
-  height: 220px;
+  width: 240px;
+  height: 240px;
   right: -60px;
   top: -70px;
-  background: var(--accent);
+  background: var(--sky);
   border-radius: 50%;
   filter: blur(70px);
-  opacity: 0.08;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.internals::after {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  left: -50px;
+  bottom: -80px;
+  background: var(--mint);
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.16;
   pointer-events: none;
 }
 
@@ -592,8 +626,8 @@ section.panel > .inner {
 
 .hyp-chip {
   appearance: none;
-  border: 1px solid var(--rule);
-  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--sky) 30%, var(--rule));
+  background: rgba(255, 255, 255, 0.7);
   color: var(--muted);
   font: inherit;
   font-size: 0.8rem;
@@ -604,18 +638,42 @@ section.panel > .inner {
     background 0.35s var(--ease),
     border-color 0.35s var(--ease),
     color 0.35s var(--ease),
-    transform 0.35s var(--ease);
+    transform 0.35s var(--ease),
+    box-shadow 0.35s var(--ease);
 }
 
 .hyp-chip:hover {
   color: var(--ink);
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--rule));
+  border-color: var(--accent);
+  transform: translateY(-1px);
 }
 
 .hyp-chip.active {
-  background: var(--accent-soft);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: linear-gradient(135deg, var(--accent), #5aa2ff);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(43, 127, 255, 0.28);
+}
+
+.hyp-chip:nth-child(2).active {
+  background: linear-gradient(135deg, var(--teal), var(--mint));
+  box-shadow: 0 8px 18px rgba(0, 194, 168, 0.28);
+}
+
+.hyp-chip:nth-child(3).active {
+  background: linear-gradient(135deg, #1ec8ff, var(--mint));
+  box-shadow: 0 8px 18px rgba(30, 200, 255, 0.28);
+}
+
+.hyp-chip:nth-child(4).active {
+  background: linear-gradient(135deg, var(--amber), #ffcf5c);
   color: var(--ink);
+  box-shadow: 0 8px 18px rgba(255, 176, 32, 0.28);
+}
+
+.hyp-chip:nth-child(5).active {
+  background: linear-gradient(135deg, var(--coral), #ff8f75);
+  box-shadow: 0 8px 18px rgba(255, 107, 74, 0.28);
 }
 
 .hyp-claim {
@@ -690,10 +748,11 @@ section.panel > .inner {
 }
 
 .panel-soft {
-  border: 1px solid var(--rule);
-  background: var(--tint);
+  border: 1px solid color-mix(in srgb, var(--sky) 25%, transparent);
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 14px;
   padding: 0.85rem 0.95rem 1rem;
+  backdrop-filter: blur(6px);
 }
 
 .layer-stack {
@@ -740,11 +799,7 @@ section.panel > .inner {
   width: 100%;
   transform-origin: left center;
   border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--accent) 70%, transparent),
-    var(--accent)
-  );
+  background: linear-gradient(90deg, var(--mint), var(--sky), var(--coral));
 }
 
 .layer-val {

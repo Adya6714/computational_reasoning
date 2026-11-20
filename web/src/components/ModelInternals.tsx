@@ -306,13 +306,13 @@ export function ModelInternals() {
                 title={`n${i}: ${v.toFixed(2)}`}
                 animate={{
                   scale: 0.7 + v * 0.55,
-                  opacity: 0.25 + v * 0.75,
+                  opacity: 0.3 + v * 0.7,
                   backgroundColor:
                     v > 0.65
-                      ? "var(--accent)"
+                      ? "var(--coral)"
                       : v > 0.4
-                        ? "color-mix(in srgb, var(--accent) 55%, var(--teal))"
-                        : "var(--rule)",
+                        ? "var(--sky)"
+                        : "var(--mint)",
                 }}
                 transition={{ type: "spring", stiffness: 140, damping: 16 }}
               />
