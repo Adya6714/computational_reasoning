@@ -1,0 +1,12 @@
+.DS_Store
+*.pyc
+__pycache__/
+.venv/
+venv/
+.env
+*.pt
+*.safetensors
+*.npy
+data/raw/
+data/processed/
+experiments/*/outputs/
