@@ -2,183 +2,162 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Marquee } from "@/components/Marquee";
+import { Panel, Kicker } from "@/components/Section";
 import { Reveal, Stagger, StaggerItem } from "@/components/Reveal";
 
-const journey = [
+const layers = [
   {
     href: "/pipeline",
-    step: "01",
-    title: "Research Pipeline",
+    n: "01",
+    title: "Research pipeline",
     blurb:
-      "How any paper should be built: ten stages, seven phases, six readiness gates, and a Research Design Document before a single sentence of manuscript.",
-    accent: "var(--vermillion)",
-    cta: "Enter the protocol",
+      "How any paper should be built: ten stages, readiness gates, and a Research Design Document before a single sentence of manuscript.",
   },
   {
     href: "/programme",
-    step: "02",
-    title: "RC Programme",
+    n: "02",
+    title: "RC programme",
     blurb:
       "Reasoning Computation: four pillars, thirteen directions, an evidence ladder, and a clear separation from RvC and RR.",
-    accent: "var(--cobalt)",
-    cta: "Explore the programme",
   },
   {
     href: "/direction-1",
-    step: "03",
+    n: "03",
     title: "Direction 1",
     blurb:
       "Paper 1 on error propagation — after a model writes a wrong intermediate value, what does the next step actually use: W, S, or P?",
-    accent: "var(--teal)",
-    cta: "Open Direction 1",
   },
+];
+
+const floats = [
+  { label: "Gate 1–6", top: "18%", left: "72%", delay: 0 },
+  { label: "Pillars I–IV", top: "42%", left: "78%", delay: 0.4 },
+  { label: "W / S / P", top: "64%", left: "70%", delay: 0.8 },
+  { label: "RQ1–RQ4", top: "28%", left: "8%", delay: 0.2 },
+  { label: "A–M", top: "58%", left: "6%", delay: 0.6 },
 ];
 
 export default function HomePage() {
   return (
     <div>
-      <section className="relative min-h-[calc(100vh-64px)] overflow-hidden border-b-2 border-ink">
-        <div className="pointer-events-none absolute inset-0">
-          <motion.div
-            className="absolute -left-20 top-24 h-72 w-72"
-            style={{ background: "var(--vermillion)" }}
-            animate={{ rotate: [0, 8, 0], y: [0, 18, 0] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute right-10 top-40 h-56 w-56"
-            style={{ background: "var(--teal)" }}
-            animate={{ rotate: [0, -12, 0], x: [0, -20, 0] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-24 left-1/3 h-40 w-64"
-            style={{ background: "var(--acid)" }}
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-10 right-1/4 h-32 w-32"
-            style={{ background: "var(--cobalt)" }}
-            animate={{ y: [0, -16, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </div>
-
-        <div className="relative mx-auto flex max-w-7xl flex-col justify-center px-4 py-20 sm:px-6 sm:py-28">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+      <Panel id="overview" center className="!justify-center overflow-hidden">
+        <div className="lattice" aria-hidden />
+        {floats.map((f) => (
+          <motion.span
+            key={f.label}
+            className="node-float"
+            style={{ top: f.top, left: f.left }}
+            animate={{ y: [0, -8, 0], opacity: [0.45, 0.85, 0.45] }}
+            transition={{
+              duration: 5.5,
+              repeat: Infinity,
+              delay: f.delay,
+              ease: "easeInOut",
+            }}
           >
-            <div className="mono mb-5 inline-flex items-center gap-2 border-2 border-ink bg-white px-3 py-1 text-[11px] uppercase tracking-[0.2em] shadow-[3px_3px_0_#0b0d10]">
-              <span className="h-2 w-2 animate-pulse bg-vermillion" />
-              Adya Srivastava · Nov 2026
-            </div>
-            <h1 className="display max-w-5xl text-6xl font-extrabold sm:text-8xl lg:text-[7.5rem]">
-              Reasoning
-              <br />
-              Computation
-            </h1>
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-ink/80 sm:text-xl">
-              An interactive map of how research should be done — then the RC programme
-              that applies it — then Direction 1, the first causal study of error
-              propagation in multi-step LLM computation.
+            {f.label}
+          </motion.span>
+        ))}
+
+        <div className="relative z-[2]">
+          <Kicker>Reasoning Computation · research programme</Kicker>
+          <h1>
+            How do language models compute — and what happens when an intermediate step goes
+            wrong?
+          </h1>
+          <p className="hero-author mt-3 !mb-0 text-[0.95rem]">
+            Adya Srivastava. Companion programme to{" "}
+            <a
+              href="https://adya6714.github.io/retrieval-vs-computation/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Retrieval vs Computation
+            </a>
+            .
+          </p>
+          <p className="lede mt-5">
+            Benchmarks tell you whether a model got the answer right. They do not tell you
+            how the computation was performed, or why an error sometimes propagates and
+            sometimes does not. This site is the interactive map of the RC programme: first
+            the paper-development protocol, then the programme, then Direction 1.
+          </p>
+
+          <div className="epistemic">
+            <p>
+              <strong className="text-[var(--ink)]">Why this is hard.</strong> A correct
+              final answer can come from systematic computation, retrieval, templates, or
+              shortcuts. A wrong answer does not reveal where the computation broke.
             </p>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Link
-                href="/pipeline"
-                className="sharp-btn bg-vermillion px-5 py-3 text-white"
-              >
-                Start with the pipeline
-              </Link>
-              <Link href="/direction-1" className="sharp-btn bg-white px-5 py-3">
-                Jump to Direction 1
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      <Marquee
-        items={[
-          "Question first",
-          "Evidence design second",
-          "Writing third",
-          "Gate before you draft",
-          "Natural errors over injected",
-          "Causal before computational-role claims",
-        ]}
-      />
-
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
-        <Reveal>
-          <div className="mono text-xs uppercase tracking-[0.2em] text-muted">
-            Three layers · one programme
+            <p>
+              <strong className="text-[var(--ink)]">What this programme adds.</strong> A
+              causally tested account of intermediate computational state — representation,
+              updating, failure, recovery — starting with a sharply bounded first study.
+            </p>
           </div>
-          <h2 className="display mt-3 max-w-3xl text-4xl font-extrabold sm:text-5xl">
-            Read it in order. Interact with each layer.
-          </h2>
+
+          <div className="status-strip">
+            <strong className="text-[var(--ink)]">Status, November 2026.</strong> Programme
+            foundation and Direction 1 design in progress. Nothing has been run. GPU use
+            needs explicit PI authorization.{" "}
+            <Link href="/pipeline">Start with the pipeline ↓</Link>
+          </div>
+        </div>
+      </Panel>
+
+      <Panel id="layers">
+        <Reveal>
+          <Kicker>Three layers · one programme</Kicker>
+          <h2>Read it in order. Interact with each layer.</h2>
+          <p className="lede">
+            The same visual language as the RvC site — calm, precise, interactive — applied
+            to the broader Reasoning Computation programme.
+          </p>
         </Reveal>
 
-        <Stagger className="mt-12 grid gap-6 lg:grid-cols-3">
-          {journey.map((item, i) => (
+        <Stagger className="mt-8 grid gap-3 md:grid-cols-3">
+          {layers.map((item) => (
             <StaggerItem key={item.href}>
               <Link
                 href={item.href}
-                className="group relative flex h-full flex-col border-2 border-ink bg-white p-6 shadow-[6px_6px_0_#0b0d10] transition hover:-translate-y-1 hover:shadow-[10px_10px_0_#0b0d10]"
+                className="card group block !no-underline hover:!no-underline"
               >
-                <div
-                  className="absolute inset-x-0 top-0 h-2"
-                  style={{ background: item.accent }}
-                />
-                <div className="mono text-xs text-muted">Layer {item.step}</div>
-                <h3 className="display mt-4 text-3xl font-extrabold">{item.title}</h3>
-                <p className="mt-4 flex-1 text-sm leading-relaxed text-muted">
-                  {item.blurb}
-                </p>
-                <div className="mt-6 flex items-center justify-between border-t-2 border-ink pt-4 font-bold">
-                  <span>{item.cta}</span>
-                  <motion.span
-                    className="inline-block"
-                    animate={{ x: [0, 6, 0] }}
-                    transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.2 }}
-                  >
-                    →
-                  </motion.span>
+                <div className="tag">Layer {item.n}</div>
+                <h3 className="mt-2 group-hover:text-[var(--accent)]">{item.title}</h3>
+                <p className="!mb-0 text-[0.9rem] text-[var(--muted)]">{item.blurb}</p>
+                <div className="mt-4 text-[0.85rem] font-medium text-[var(--accent)]">
+                  Open →
                 </div>
               </Link>
             </StaggerItem>
           ))}
         </Stagger>
-      </section>
+      </Panel>
 
-      <section className="border-t-2 border-ink bg-ink text-paper">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <Reveal>
-            <h2 className="display text-4xl font-extrabold sm:text-5xl">
-              The principle behind every paper.
-            </h2>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-paper/75">
-              Establish the scientific question first. Design the evidence-generation
-              process second. Write the paper third. This site is the interactive SOP for
-              that discipline — applied to Reasoning Computation.
+      <Panel id="principle">
+        <Reveal>
+          <Kicker>Operating principle</Kicker>
+          <h2>Question first. Evidence design second. Writing third.</h2>
+          <p className="lede">
+            Establish the scientific question first, design the evidence-generation process
+            second, and write the paper third. That discipline is the pipeline. RC is where
+            it is applied. Direction 1 is the first study.
+          </p>
+          <div className="mt-8 border border-[var(--rule)] bg-[var(--tint)] p-5 max-w-[62ch]">
+            <div className="tag">Paper 1 one-liner</div>
+            <p
+              className="mt-2 !mb-0 text-[1.25rem] leading-snug"
+              style={{ fontFamily: "var(--serif)" }}
+            >
+              After the model itself writes a wrong intermediate value, what does the next
+              dependent step actually use?
             </p>
-          </Reveal>
-          <Reveal delay={0.15}>
-            <div className="border-2 border-paper bg-vermillion p-6 text-white shadow-[8px_8px_0_var(--acid)]">
-              <div className="mono text-xs uppercase tracking-[0.18em] text-white/80">
-                Paper 1 one-liner
-              </div>
-              <p className="display mt-3 text-2xl font-extrabold leading-tight">
-                After the model writes a wrong intermediate value, what does the next
-                dependent step actually use?
-              </p>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+            <Link href="/direction-1" className="mt-4 inline-block text-[0.9rem]">
+              Open Direction 1 →
+            </Link>
+          </div>
+        </Reveal>
+      </Panel>
     </div>
   );
 }

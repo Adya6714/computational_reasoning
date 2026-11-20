@@ -9,70 +9,54 @@ export function EvidenceLadder() {
   const item = evidenceLadder[rung];
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col gap-2">
-        {evidenceLadder.map((level, i) => {
-          const active = i === rung;
-          const climbed = i <= rung;
-          return (
+    <div className="shell">
+      <div className="shell-body !min-h-0">
+        <div className="shell-rail">
+          {evidenceLadder.map((level, i) => (
             <button
               key={level.level}
               type="button"
+              className={i === rung ? "active" : undefined}
               onClick={() => setRung(i)}
-              className={`relative flex items-center gap-4 border-2 border-ink px-4 py-3 text-left transition-all ${
-                active
-                  ? "bg-ink text-paper shadow-[5px_5px_0_var(--teal)]"
-                  : climbed
-                    ? "bg-teal/20 hover:shadow-[3px_3px_0_#0b0d10]"
-                    : "bg-white hover:shadow-[3px_3px_0_#0b0d10]"
-              }`}
-              style={{ marginLeft: `${i * 12}px`, maxWidth: `calc(100% - ${i * 12}px)` }}
             >
-              <span
-                className={`mono flex h-8 w-8 shrink-0 items-center justify-center border-2 border-ink text-xs font-bold ${
-                  active ? "bg-acid text-ink" : "bg-white text-ink"
-                }`}
-              >
-                L{i + 1}
-              </span>
-              <span className="font-bold">{level.level}</span>
+              <span className="n">L{i + 1}</span>
+              <span>{level.level}</span>
             </button>
-          );
-        })}
+          ))}
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={item.level}
+            className="shell-canvas"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <div className="tag">Example</div>
+                <p className="mt-2 !mb-0 font-medium">{item.example}</p>
+              </div>
+              <div>
+                <div className="tag">Typical evidence</div>
+                <p className="mt-2 !mb-0 text-[0.9rem] text-[var(--muted)]">
+                  {item.evidence}
+                </p>
+              </div>
+              <div className="border border-[var(--amber)] bg-[var(--amber-soft)] p-3">
+                <div className="tag !text-[var(--amber)]">Does not establish</div>
+                <p className="mt-2 !mb-0 text-[0.9rem]">{item.not}</p>
+              </div>
+            </div>
+            <p className="caption">
+              Direction 1&apos;s written-value interventions sit on the behavioural rung.
+              Only pre-write activation interventions reach causal involvement. Paper 1 does
+              not claim the computational-role rung.
+            </p>
+          </motion.div>
+        </AnimatePresence>
       </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={item.level}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="grid gap-4 border-2 border-ink bg-white p-5 shadow-[6px_6px_0_#0b0d10] sm:grid-cols-3"
-        >
-          <div>
-            <div className="mono text-[10px] uppercase tracking-widest text-muted">Example</div>
-            <p className="mt-2 font-semibold">{item.example}</p>
-          </div>
-          <div>
-            <div className="mono text-[10px] uppercase tracking-widest text-muted">
-              Typical evidence
-            </div>
-            <p className="mt-2 text-sm text-muted">{item.evidence}</p>
-          </div>
-          <div className="border-2 border-vermillion bg-vermillion/10 p-3">
-            <div className="mono text-[10px] uppercase tracking-widest text-vermillion">
-              Does not establish
-            </div>
-            <p className="mt-2 text-sm font-medium">{item.not}</p>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      <p className="mt-4 text-sm text-muted">
-        Direction 1&apos;s written-value interventions sit on the behavioural rung. Only
-        pre-write activation interventions reach causal involvement. Paper 1 does not claim
-        the computational-role rung.
-      </p>
     </div>
   );
 }

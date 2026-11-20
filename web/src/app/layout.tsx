@@ -1,41 +1,33 @@
 import type { Metadata } from "next";
-import { Syne, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
-import { Nav } from "@/components/Nav";
+import { Instrument_Serif, Inter } from "next/font/google";
+import { Rail } from "@/components/Rail";
 import "./globals.css";
 
-const syne = Syne({
-  variable: "--font-syne",
+const instrument = Instrument_Serif({
+  variable: "--font-instrument",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: "400",
+  style: ["normal", "italic"],
 });
 
-const plex = IBM_Plex_Sans({
-  variable: "--font-plex",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "RC · Reasoning Computation",
+  title: "Reasoning Computation | Adya Srivastava",
   description:
-    "Interactive research programme: paper development protocol, Reasoning Computation programme, and Direction 1 on error propagation.",
+    "Research programme on how language models represent, transform and recover from intermediate computational states — with a paper development protocol and Direction 1 on error propagation.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${syne.variable} ${plex.variable} ${plexMono.variable} h-full`}
-    >
-      <body className="noise-overlay min-h-full flex flex-col grid-bg antialiased">
-        <Nav />
-        <main className="relative z-10 flex-1">{children}</main>
+    <html lang="en" className={`${instrument.variable} ${inter.variable} h-full`}>
+      <body className="min-h-full antialiased">
+        <Rail />
+        <div className="site-main">{children}</div>
       </body>
     </html>
   );

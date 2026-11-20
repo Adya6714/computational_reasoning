@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { PageHero, SectionBlock } from "@/components/Section";
+import { Panel, Kicker } from "@/components/Section";
 import { Reveal, Stagger, StaggerItem } from "@/components/Reveal";
 import { InterventionPlayground } from "@/components/direction1/InterventionPlayground";
 import { ExplanationGrid } from "@/components/direction1/ExplanationGrid";
@@ -20,205 +19,208 @@ import {
 export default function Direction1Page() {
   return (
     <div>
-      <PageHero
-        kicker="Layer 03 · Paper 1 · Research Direction 1"
-        title="Error propagation"
-        subtitle={oneLiner}
-        accent="var(--teal)"
-      />
-
-      <section className="border-b-2 border-ink bg-ink text-paper">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-          <Reveal>
-            <div className="mono text-xs uppercase tracking-[0.2em] text-paper/60">
-              Research question
-            </div>
-            <p className="display mt-3 max-w-4xl text-2xl font-extrabold leading-snug sm:text-3xl">
-              How do incorrect intermediate values causally influence subsequent
-              computation in language models, and what determines whether those errors
-              are propagated or corrected?
-            </p>
-          </Reveal>
+      <Panel id="d1-hero" center>
+        <div className="lattice" aria-hidden />
+        <div className="relative z-[2]">
+          <Kicker>Layer 03 · Paper 1 · Research Direction 1</Kicker>
+          <h1>Error propagation</h1>
+          <p
+            className="mt-2 max-w-[54ch] text-[1.15rem] text-[var(--muted)]"
+            style={{ fontFamily: "var(--serif)" }}
+          >
+            {oneLiner}
+          </p>
+          <div className="status-strip">
+            <strong className="text-[var(--ink)]">Research question.</strong> How do
+            incorrect intermediate values causally influence subsequent computation in
+            language models, and what determines whether those errors are propagated or
+            corrected?
+          </div>
         </div>
-      </section>
+      </Panel>
 
-      <SectionBlock eyebrow="Problem" title="Same outputs, different computations">
-        <p className="mb-6 max-w-3xl text-muted">
-          When a model generates an incorrect intermediate value and later consumes it,
-          several behaviours are possible. They can produce similar outputs while implying
-          very different internal computations — and they are not mutually exclusive.
-        </p>
-        <Stagger className="grid gap-3 sm:grid-cols-2">
+      <Panel id="problem">
+        <Reveal>
+          <Kicker>Problem</Kicker>
+          <h2>Same outputs, different computations</h2>
+          <p className="lede">
+            When a model generates an incorrect intermediate value and later consumes it,
+            several behaviours are possible. They can produce similar outputs while implying
+            very different internal computations — and they are not mutually exclusive.
+          </p>
+        </Reveal>
+        <Stagger className="mt-6 grid gap-2 sm:grid-cols-2">
           {paper1Behaviours.map((b, i) => (
             <StaggerItem key={b}>
-              <div className="flex items-start gap-3 border-2 border-ink bg-white p-4 shadow-[4px_4px_0_#0b0d10]">
-                <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-ink text-sm font-extrabold"
-                  style={{
-                    background: ["var(--vermillion)", "var(--cobalt)", "var(--teal)", "var(--acid)"][
-                      i
-                    ],
-                  }}
-                >
-                  {i + 1}
-                </span>
-                <p className="font-semibold leading-snug">{b}</p>
+              <div className="card flex gap-3">
+                <span className="tag shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                <p className="!mb-0 font-medium">{b}</p>
               </div>
             </StaggerItem>
           ))}
         </Stagger>
-      </SectionBlock>
+      </Panel>
 
-      <div className="border-y-2 border-ink bg-paper-2/60">
-        <SectionBlock eyebrow="W · S · P" title="Intervention playground">
-          <Reveal>
-            <InterventionPlayground />
-          </Reveal>
-        </SectionBlock>
-      </div>
+      <Panel id="interventions">
+        <Reveal>
+          <Kicker>W · S · P</Kicker>
+          <h2>Intervention playground</h2>
+          <InterventionPlayground />
+        </Reveal>
+      </Panel>
 
-      <SectionBlock eyebrow="RQs" title="Research questions">
-        <div className="grid gap-3">
-          {researchQuestions.map((rq, i) => (
-            <Reveal key={rq.id} delay={i * 0.04}>
-              <motion.div
-                whileHover={{ scale: 1.01 }}
-                className="grid gap-3 border-2 border-ink bg-white p-4 shadow-[4px_4px_0_#0b0d10] sm:grid-cols-[120px_1fr_160px]"
-              >
-                <div className="display text-3xl font-extrabold text-vermillion">{rq.id}</div>
-                <p className="font-medium leading-relaxed">{rq.q}</p>
-                <div className="border-2 border-ink bg-acid px-2 py-1 text-center text-xs font-extrabold uppercase tracking-wide self-start">
-                  {rq.role}
+      <Panel id="rqs">
+        <Reveal>
+          <Kicker>Research questions</Kicker>
+          <h2>What Direction 1 asks</h2>
+        </Reveal>
+        <div className="mt-6 grid gap-2">
+          {researchQuestions.map((rq) => (
+            <Reveal key={rq.id}>
+              <div className="card grid gap-2 sm:grid-cols-[5rem_1fr_auto] sm:items-start">
+                <div
+                  className="text-2xl text-[var(--accent)]"
+                  style={{ fontFamily: "var(--serif)" }}
+                >
+                  {rq.id}
                 </div>
-              </motion.div>
+                <p className="!mb-0 font-medium">{rq.q}</p>
+                <span className="chip !cursor-default self-start text-[0.72rem]">
+                  {rq.role}
+                </span>
+              </div>
             </Reveal>
           ))}
         </div>
-      </SectionBlock>
+      </Panel>
 
-      <div className="border-y-2 border-ink bg-cobalt text-white">
-        <SectionBlock eyebrow="Gap (candidate)" title="What is still insufficiently characterized">
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {gapPoints.map((g) => (
-              <Reveal key={g.title}>
-                <div className="h-full border-2 border-paper/40 bg-ink/30 p-4 backdrop-blur-sm">
-                  <h3 className="font-extrabold text-acid">{g.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/80">{g.body}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </SectionBlock>
-      </div>
-
-      <SectionBlock
-        eyebrow="Competing explanations"
-        title="Flip a card — claim vs Paper 1 prediction"
-      >
+      <Panel id="gap">
         <Reveal>
-          <ExplanationGrid />
+          <Kicker>Gap (candidate, not novelty-validated)</Kicker>
+          <h2>What is still insufficiently characterized</h2>
         </Reveal>
-        <p className="mt-4 text-sm text-muted">
-          These are not mutually exclusive. The objective is to identify which information
-          causally affects downstream computation under stated conditions.
-        </p>
-      </SectionBlock>
+        <div className="mt-6 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {gapPoints.map((g) => (
+            <Reveal key={g.title}>
+              <div className="card h-full">
+                <h3 className="!text-[1.05rem]">{g.title}</h3>
+                <p className="!mb-0 text-[0.88rem] text-[var(--muted)]">{g.body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </Panel>
 
-      <div className="border-y-2 border-ink">
-        <SectionBlock eyebrow="Contribution boundary" title="What Paper 1 can claim — if supported">
-          <Reveal>
-            <div className="border-2 border-ink bg-white p-6 shadow-[6px_6px_0_#0b0d10]">
-              <p className="text-lg font-semibold leading-relaxed">{contribution.proposed}</p>
-            </div>
-          </Reveal>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {contribution.hierarchy.map((h) => (
-              <Reveal key={h.tier}>
-                <div className="border-2 border-ink bg-paper p-4">
-                  <div className="mono text-[10px] uppercase tracking-widest text-vermillion">
-                    {h.tier}
-                  </div>
-                  <p className="mt-2 text-sm font-medium">{h.text}</p>
-                </div>
-              </Reveal>
-            ))}
+      <Panel id="explanations">
+        <Reveal>
+          <Kicker>Competing explanations</Kicker>
+          <h2>Flip a card — claim vs Paper 1 prediction</h2>
+          <ExplanationGrid />
+          <p className="caption">
+            These are not mutually exclusive. The objective is to identify which information
+            causally affects downstream computation under stated conditions.
+          </p>
+        </Reveal>
+      </Panel>
+
+      <Panel id="contribution">
+        <Reveal>
+          <Kicker>Contribution boundary</Kicker>
+          <h2>What Paper 1 can claim — if supported</h2>
+          <div className="card !bg-[var(--paper)]">
+            <p className="!mb-0 text-[1.05rem] leading-relaxed">{contribution.proposed}</p>
           </div>
-        </SectionBlock>
-      </div>
+        </Reveal>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          {contribution.hierarchy.map((h) => (
+            <Reveal key={h.tier}>
+              <div className="card">
+                <div className="tag">{h.tier}</div>
+                <p className="mt-2 !mb-0 text-[0.9rem]">{h.text}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </Panel>
 
-      <SectionBlock eyebrow="How it will be tested" title="Design summary">
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <Panel id="test-plan">
+        <Reveal>
+          <Kicker>How it will be tested</Kicker>
+          <h2>Design summary</h2>
+        </Reveal>
+        <div className="mt-6 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {testPlan.map((t) => (
             <Reveal key={t.title}>
-              <div className="h-full border-2 border-ink bg-white p-4 shadow-[3px_3px_0_#0b0d10]">
-                <div className="display text-xl font-extrabold">{t.title}</div>
-                <p className="mt-2 text-sm text-muted">{t.body}</p>
+              <div className="card h-full">
+                <h3>{t.title}</h3>
+                <p className="!mb-0 text-[0.88rem] text-[var(--muted)]">{t.body}</p>
               </div>
             </Reveal>
           ))}
         </div>
-      </SectionBlock>
+      </Panel>
 
-      <div className="border-y-2 border-ink bg-teal/15">
-        <SectionBlock eyebrow="Implementation" title="Phase map 0 → 3">
-          <div className="grid gap-4 lg:grid-cols-4">
-            {phaseMap.map((p, i) => (
-              <Reveal key={p.phase} delay={i * 0.05}>
-                <div className="relative h-full border-2 border-ink bg-white p-5 shadow-[5px_5px_0_#0b0d10]">
-                  <div className="display text-5xl font-extrabold text-teal">{p.phase}</div>
-                  <h3 className="mt-2 text-lg font-extrabold">{p.title}</h3>
-                  <p className="mt-2 text-sm text-muted">{p.goal}</p>
-                  <p className="mt-3 border-t-2 border-ink pt-3 text-xs font-semibold">
-                    {p.outputs}
-                  </p>
-                  <p className="mt-2 mono text-[10px] uppercase tracking-widest text-muted">
-                    {p.who}
-                  </p>
+      <Panel id="phases">
+        <Reveal>
+          <Kicker>Implementation</Kicker>
+          <h2>Phase map 0 → 3</h2>
+        </Reveal>
+        <div className="mt-6 grid gap-3 lg:grid-cols-4">
+          {phaseMap.map((p) => (
+            <Reveal key={p.phase}>
+              <div className="card h-full">
+                <div
+                  className="text-4xl text-[var(--accent)]"
+                  style={{ fontFamily: "var(--serif)" }}
+                >
+                  {p.phase}
                 </div>
-              </Reveal>
-            ))}
-          </div>
-        </SectionBlock>
-      </div>
+                <h3 className="mt-1">{p.title}</h3>
+                <p className="text-[0.88rem] text-[var(--muted)]">{p.goal}</p>
+                <p className="!mb-1 border-t border-[var(--rule)] pt-3 text-[0.8rem] font-medium">
+                  {p.outputs}
+                </p>
+                <p className="!mb-0 text-[0.72rem] text-[var(--muted)]">{p.who}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </Panel>
 
-      <SectionBlock eyebrow="Ground rules" title="What may happen now">
-        <div className="grid gap-2">
+      <Panel id="rules">
+        <Reveal>
+          <Kicker>Ground rules</Kicker>
+          <h2>What may happen now</h2>
+        </Reveal>
+        <div className="mt-6 grid gap-2">
           {groundRules.map((rule) => (
             <Reveal key={rule}>
-              <div className="border-l-4 border-vermillion bg-white px-4 py-3 text-sm font-medium shadow-[2px_2px_0_#0b0d10]">
-                {rule}
-              </div>
+              <div className="status-strip !mt-0">{rule}</div>
             </Reveal>
           ))}
         </div>
-      </SectionBlock>
+      </Panel>
 
-      <section className="border-t-2 border-ink bg-ink text-paper">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-4 py-14 sm:flex-row sm:items-center sm:px-6">
-          <div>
-            <div className="mono text-xs uppercase tracking-[0.2em] text-paper/60">
-              Full loop
-            </div>
-            <h2 className="display mt-2 text-3xl font-extrabold sm:text-4xl">
-              Pipeline → Programme → Direction 1
-            </h2>
-            <p className="mt-2 max-w-xl text-paper/75">
-              Revisit the SOP, or return home to walk the three layers again.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/pipeline" className="sharp-btn bg-vermillion px-5 py-3 font-bold text-white">
+      <Panel id="loop">
+        <Reveal>
+          <Kicker>Full loop</Kicker>
+          <h2>Pipeline → Programme → Direction 1</h2>
+          <p className="lede">
+            Revisit the SOP, or return home to walk the three layers again.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/pipeline" className="btn !no-underline">
               Pipeline
             </Link>
-            <Link href="/programme" className="sharp-btn bg-cobalt px-5 py-3 font-bold text-white">
+            <Link href="/programme" className="btn !no-underline">
               Programme
             </Link>
-            <Link href="/" className="sharp-btn bg-acid px-5 py-3 font-bold text-ink">
-              Home
+            <Link href="/" className="btn primary !no-underline">
+              Overview
             </Link>
           </div>
-        </div>
-      </section>
+        </Reveal>
+      </Panel>
     </div>
   );
 }

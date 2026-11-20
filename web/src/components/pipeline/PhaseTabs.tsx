@@ -12,32 +12,26 @@ import {
 } from "@/data/pipeline";
 
 const tabs = [
-  { id: "foundation", label: "Foundation", color: "var(--vermillion)" },
-  { id: "literature", label: "Literature", color: "var(--cobalt)" },
-  { id: "method", label: "Methodology", color: "var(--teal)" },
-  { id: "writing", label: "Writing", color: "var(--acid)" },
-  { id: "qa", label: "QA", color: "var(--vermillion)" },
-  { id: "rdd", label: "RDD", color: "var(--cobalt)" },
+  { id: "foundation", label: "Foundation" },
+  { id: "literature", label: "Literature" },
+  { id: "method", label: "Methodology" },
+  { id: "writing", label: "Writing" },
+  { id: "qa", label: "QA" },
+  { id: "rdd", label: "RDD" },
 ] as const;
 
 export function PhaseTabs() {
   const [tab, setTab] = useState<(typeof tabs)[number]["id"]>("foundation");
-  const active = tabs.find((t) => t.id === tab)!;
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap gap-2">
         {tabs.map((t) => (
           <button
             key={t.id}
             type="button"
+            className={`tab ${tab === t.id ? "active" : ""}`}
             onClick={() => setTab(t.id)}
-            className={`border-2 border-ink px-3 py-2 text-sm font-bold transition-all ${
-              tab === t.id
-                ? "text-ink shadow-[3px_3px_0_#0b0d10]"
-                : "bg-white text-muted hover:text-ink"
-            }`}
-            style={{ background: tab === t.id ? t.color : undefined }}
           >
             {t.label}
           </button>
@@ -47,137 +41,143 @@ export function PhaseTabs() {
       <AnimatePresence mode="wait">
         <motion.div
           key={tab}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          className="border-2 border-ink bg-white p-5 shadow-[5px_5px_0_#0b0d10] sm:p-7"
-          style={{ borderTop: `6px solid ${active.color}` }}
+          exit={{ opacity: 0 }}
+          className="shell"
         >
-          {tab === "foundation" && (
-            <div>
-              <p className="mb-4 text-sm text-muted">
-                Before reading hundreds of papers or writing anything, answer these.
-                A research gap must be a meaningful unresolved problem — not merely an
-                under-attended area.
-              </p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {foundationQuestions.map((item) => (
-                  <div
-                    key={item.q}
-                    className="border-2 border-ink bg-paper p-3 transition hover:-translate-y-0.5 hover:shadow-[3px_3px_0_#0b0d10]"
-                  >
-                    <div className="font-bold">{item.q}</div>
-                    <div className="mt-1 text-sm text-muted">{item.a}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {tab === "literature" && (
-            <div>
-              <p className="mb-4 text-sm text-muted">
-                Do not just summarise. Synthesise: Paper A establishes X → Paper B
-                challenges X → none investigate Y under Z → that becomes the gap.
-              </p>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {literatureTypes.map((item) => (
-                  <div key={item.label} className="border-2 border-ink p-4">
-                    <div
-                      className="mb-2 inline-block border-2 border-ink px-2 py-0.5 text-xs font-bold"
-                      style={{ background: active.color }}
-                    >
-                      {item.label}
+          <div className="shell-canvas !bg-[var(--tint)]">
+            {tab === "foundation" && (
+              <div>
+                <p className="caption !mt-0 !mb-4">
+                  Before reading hundreds of papers or writing anything, answer these. A
+                  research gap must be a meaningful unresolved problem — not merely an
+                  under-attended area.
+                </p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {foundationQuestions.map((item) => (
+                    <div key={item.q} className="card !bg-[var(--paper)]">
+                      <div className="font-medium">{item.q}</div>
+                      <div className="mt-1 text-[0.88rem] text-[var(--muted)]">
+                        {item.a}
+                      </div>
                     </div>
-                    <p className="text-sm text-muted">{item.desc}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {tab === "method" && (
-            <div>
-              <p className="mb-4 text-sm font-semibold text-ink">
-                Critical rule: design experiments that could prove your hypothesis wrong —
-                not only ones that could confirm it.
-              </p>
+            {tab === "literature" && (
+              <div>
+                <p className="caption !mt-0 !mb-4">
+                  Do not just summarise. Synthesise: Paper A establishes X → Paper B
+                  challenges X → none investigate Y under Z → that becomes the gap.
+                </p>
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {literatureTypes.map((item) => (
+                    <div key={item.label} className="card !bg-[var(--paper)]">
+                      <div className="tag">{item.label}</div>
+                      <p className="mt-2 !mb-0 text-[0.88rem] text-[var(--muted)]">
+                        {item.desc}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {tab === "method" && (
+              <div>
+                <div className="status-strip !mt-0 !mb-4">
+                  Critical rule: design experiments that could prove your hypothesis wrong —
+                  not only ones that could confirm it.
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {methodComponents.map((c) => (
+                    <div
+                      key={c.name}
+                      className="border-l-2 border-[var(--accent)] bg-[var(--paper)] py-2 pl-3"
+                    >
+                      <div className="text-[0.85rem] font-semibold text-[var(--accent)]">
+                        {c.name}
+                      </div>
+                      <div className="text-[0.85rem] text-[var(--muted)]">{c.q}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {tab === "writing" && (
+              <div>
+                <p className="caption !mt-0 !mb-4">
+                  Draft Methodology and Results first, then Related Work and Introduction,
+                  and finally Abstract and Conclusion.
+                </p>
+                <div className="space-y-1">
+                  {paperStructure.map((s, i) => (
+                    <details
+                      key={s.section}
+                      className="border border-[var(--rule)] bg-[var(--paper)] open:bg-[var(--tint)]"
+                    >
+                      <summary className="cursor-pointer px-3 py-2.5 font-medium">
+                        <span className="mr-2 text-[0.72rem] text-[var(--accent)]">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        {s.section}
+                      </summary>
+                      <ul className="space-y-1 border-t border-[var(--rule)] px-4 py-3 text-[0.88rem] text-[var(--muted)]">
+                        {s.points.map((p) => (
+                          <li key={p}>→ {p}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {tab === "qa" && (
               <div className="grid gap-2 sm:grid-cols-2">
-                {methodComponents.map((c) => (
-                  <div key={c.name} className="flex gap-3 border-l-4 border-ink bg-paper p-3">
-                    <div className="font-bold text-teal">{c.name}</div>
-                    <div className="text-sm text-muted">{c.q}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {tab === "writing" && (
-            <div>
-              <p className="mb-4 text-sm text-muted">
-                Draft Methodology and Results first, then Related Work and Introduction,
-                and finally Abstract and Conclusion. Writing order ≠ presentation order.
-              </p>
-              <div className="space-y-2">
-                {paperStructure.map((s, i) => (
-                  <details
-                    key={s.section}
-                    className="group border-2 border-ink bg-paper open:bg-white open:shadow-[3px_3px_0_#0b0d10]"
+                {qaChecklist.map((item) => (
+                  <label
+                    key={item.dim}
+                    className="card flex cursor-pointer items-start gap-3 !bg-[var(--paper)] has-[:checked]:hl"
                   >
-                    <summary className="cursor-pointer list-none px-4 py-3 font-bold marker:content-none">
-                      <span className="mono mr-3 text-xs text-muted">
-                        {String(i + 1).padStart(2, "0")}
+                    <input
+                      type="checkbox"
+                      className="mt-1 accent-[var(--accent)]"
+                    />
+                    <span>
+                      <span className="block font-medium">{item.dim}</span>
+                      <span className="text-[0.85rem] text-[var(--muted)]">
+                        {item.check}
                       </span>
-                      {s.section}
-                    </summary>
-                    <ul className="space-y-1 border-t-2 border-ink px-4 py-3 text-sm text-muted">
-                      {s.points.map((p) => (
-                        <li key={p}>→ {p}</li>
-                      ))}
-                    </ul>
-                  </details>
+                    </span>
+                  </label>
                 ))}
               </div>
-            </div>
-          )}
+            )}
 
-          {tab === "qa" && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {qaChecklist.map((item) => (
-                <label
-                  key={item.dim}
-                  className="flex cursor-pointer items-start gap-3 border-2 border-ink p-3 has-[:checked]:bg-acid/40"
-                >
-                  <input type="checkbox" className="mt-1 h-4 w-4 accent-[var(--vermillion)]" />
-                  <span>
-                    <span className="block font-bold">{item.dim}</span>
-                    <span className="text-sm text-muted">{item.check}</span>
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
-
-          {tab === "rdd" && (
-            <div>
-              <p className="mb-4 text-sm text-muted">
-                The Research Design Document exists before the manuscript. Question first,
-                evidence design second, writing third.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {rddItems.map((item, i) => (
-                  <span
-                    key={item}
-                    className="border-2 border-ink bg-paper px-3 py-1.5 text-sm font-medium transition hover:bg-cobalt hover:text-white"
-                    style={{ transitionDelay: `${i * 10}ms` }}
-                  >
-                    {item}
-                  </span>
-                ))}
+            {tab === "rdd" && (
+              <div>
+                <p className="caption !mt-0 !mb-4">
+                  The Research Design Document exists before the manuscript. Question first,
+                  evidence design second, writing third.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {rddItems.map((item) => (
+                    <span
+                      key={item}
+                      className="border border-[var(--rule)] bg-[var(--paper)] px-2.5 py-1 text-[0.82rem]"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </motion.div>
       </AnimatePresence>
     </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { readinessGates } from "@/data/pipeline";
 
 export function GateSystem() {
@@ -21,42 +20,32 @@ export function GateSystem() {
 
   return (
     <div>
-      <div className="mb-6 flex items-end justify-between gap-4">
-        <div>
-          <div className="mono text-xs uppercase tracking-[0.18em] text-muted">
-            Interactive gate checklist
-          </div>
-          <p className="mt-1 max-w-xl text-sm text-muted">
-            Approve gates in order. Later gates stay locked until earlier ones pass —
-            the same discipline the programme uses before writing.
-          </p>
-        </div>
-        <div className="mono text-right text-sm font-semibold">
+      <div className="mb-3 flex items-end justify-between gap-4">
+        <p className="caption !mt-0">
+          Approve gates in order. Later gates stay locked until earlier ones pass —
+          the same discipline before writing a manuscript.
+        </p>
+        <div className="shrink-0 text-[0.85rem] font-medium tabular-nums">
           {Math.round(progress)}% ready
         </div>
       </div>
 
-      <div className="mb-8 h-3 w-full border-2 border-ink bg-paper-2">
-        <motion.div
-          className="h-full bg-vermillion"
-          animate={{ width: `${progress}%` }}
-          transition={{ type: "spring", stiffness: 120, damping: 20 }}
-        />
+      <div className="progress-track mb-5">
+        <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="grid gap-3">
+      <div className="grid gap-2">
         {readinessGates.map((gate) => {
           const isOpen = gate.id <= unlocked;
           const isDone = !!approved[gate.id];
           return (
-            <motion.button
+            <button
               key={gate.id}
               type="button"
               disabled={!isOpen}
               onClick={() =>
                 setApproved((prev) => {
                   if (!prev[gate.id]) return { ...prev, [gate.id]: true };
-                  // un-approving clears later gates
                   const next: Record<number, boolean> = {};
                   for (const g of readinessGates) {
                     if (g.id < gate.id && prev[g.id]) next[g.id] = true;
@@ -64,34 +53,37 @@ export function GateSystem() {
                   return next;
                 })
               }
-              whileTap={isOpen ? { scale: 0.985 } : undefined}
-              className={`flex items-start gap-4 border-2 border-ink p-4 text-left transition-all ${
-                !isOpen
-                  ? "cursor-not-allowed bg-paper-2 opacity-45"
-                  : isDone
-                    ? "bg-teal/30 shadow-[4px_4px_0_#0b0d10]"
-                    : "bg-white hover:shadow-[4px_4px_0_#0b0d10]"
-              }`}
+              className={`card flex w-full items-start gap-3 text-left ${
+                isDone ? "hl" : ""
+              } ${!isOpen ? "opacity-45" : ""}`}
             >
               <span
-                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border-2 border-ink font-bold ${
-                  isDone ? "bg-ink text-acid" : "bg-white"
-                }`}
+                className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center border text-[0.78rem] font-semibold"
+                style={{
+                  borderColor: "var(--rule)",
+                  background: isDone ? "var(--accent)" : "var(--paper)",
+                  color: isDone ? "#fff" : "var(--ink)",
+                }}
               >
                 {isDone ? "✓" : gate.id}
               </span>
-              <span className="min-w-0 flex-1">
-                <span className="display block text-xl font-extrabold">{gate.name}</span>
-                <span className="mt-1 block text-sm leading-relaxed text-muted">
+              <span>
+                <span
+                  className="block text-[1.05rem]"
+                  style={{ fontFamily: "var(--serif)" }}
+                >
+                  {gate.name}
+                </span>
+                <span className="mt-1 block text-[0.88rem] text-[var(--muted)]">
                   {gate.check}
                 </span>
                 {!isOpen && (
-                  <span className="mono mt-2 inline-block text-[10px] uppercase tracking-widest text-vermillion">
+                  <span className="tag mt-2 inline-block">
                     Locked — approve gate {gate.id - 1} first
                   </span>
                 )}
               </span>
-            </motion.button>
+            </button>
           );
         })}
       </div>

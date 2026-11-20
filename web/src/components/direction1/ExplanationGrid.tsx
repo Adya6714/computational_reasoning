@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { competingExplanations } from "@/data/direction1";
 
 export function ExplanationGrid() {
@@ -15,35 +14,29 @@ export function ExplanationGrid() {
           <button
             key={item.name}
             type="button"
+            className={`flip-card ${isFlipped ? "flipped" : ""}`}
             onClick={() => setFlipped((p) => ({ ...p, [i]: !p[i] }))}
-            className="perspective-[1000px] h-44 text-left"
           >
-            <motion.div
-              className="relative h-full w-full"
-              animate={{ rotateY: isFlipped ? 180 : 0 }}
-              transition={{ duration: 0.45 }}
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              <div
-                className="absolute inset-0 border-2 border-ink bg-white p-4 shadow-[4px_4px_0_#0b0d10]"
-                style={{ backfaceVisibility: "hidden" }}
-              >
-                <div className="mono text-[10px] uppercase tracking-widest text-muted">
-                  Click to flip · claim
+            <div className="flip-inner">
+              <div className="flip-face">
+                <div className="tag">Click to flip · claim</div>
+                <div
+                  className="mt-2 text-[1.05rem] leading-snug"
+                  style={{ fontFamily: "var(--serif)" }}
+                >
+                  {item.name}
                 </div>
-                <div className="display mt-2 text-xl font-extrabold leading-tight">{item.name}</div>
-                <p className="mt-3 text-sm text-muted">{item.claim}</p>
+                <p className="mt-2 !mb-0 text-[0.85rem] text-[var(--muted)]">
+                  {item.claim}
+                </p>
               </div>
-              <div
-                className="absolute inset-0 border-2 border-ink bg-cobalt p-4 text-white shadow-[4px_4px_0_#0b0d10]"
-                style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-              >
-                <div className="mono text-[10px] uppercase tracking-widest text-acid">
-                  Prediction in Paper 1 terms
-                </div>
-                <p className="mt-3 text-sm font-semibold leading-relaxed">{item.prediction}</p>
+              <div className="flip-face flip-back">
+                <div className="tag">Prediction in Paper 1 terms</div>
+                <p className="mt-3 !mb-0 text-[0.88rem] font-medium leading-relaxed">
+                  {item.prediction}
+                </p>
               </div>
-            </motion.div>
+            </div>
           </button>
         );
       })}
