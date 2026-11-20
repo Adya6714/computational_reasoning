@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Panel, Kicker } from "@/components/Section";
 import { Reveal, Stagger, StaggerItem } from "@/components/Reveal";
+import { ModelInternals } from "@/components/ModelInternals";
 
 const layers = [
   {
@@ -42,14 +43,39 @@ export default function HomePage() {
     <div>
       <Panel id="overview" center className="!justify-center overflow-hidden">
         <div className="lattice" aria-hidden />
+        <motion.div
+          className="ambient"
+          style={{
+            width: 320,
+            height: 320,
+            top: "12%",
+            right: "8%",
+            background: "var(--accent)",
+          }}
+          animate={{ x: [0, 18, 0], y: [0, 12, 0] }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="ambient"
+          style={{
+            width: 240,
+            height: 240,
+            bottom: "18%",
+            left: "6%",
+            background: "var(--teal)",
+            opacity: 0.14,
+          }}
+          animate={{ x: [0, -14, 0], y: [0, -10, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        />
         {floats.map((f) => (
           <motion.span
             key={f.label}
             className="node-float"
             style={{ top: f.top, left: f.left }}
-            animate={{ y: [0, -8, 0], opacity: [0.45, 0.85, 0.45] }}
+            animate={{ y: [0, -6, 0], opacity: [0.35, 0.7, 0.35] }}
             transition={{
-              duration: 5.5,
+              duration: 7,
               repeat: Infinity,
               delay: f.delay,
               ease: "easeInOut",
@@ -134,6 +160,18 @@ export default function HomePage() {
         </Stagger>
       </Panel>
 
+      <Panel id="internals-preview">
+        <Reveal>
+          <Kicker>Play with the insides</Kicker>
+          <h2>Hypotheses that move layers, circuits, and neurons</h2>
+          <p className="lede">
+            A quiet sketch of how different stories about error propagation would light up a
+            network. Soften the sliders. Switch the claim. Watch it rearrange.
+          </p>
+          <ModelInternals />
+        </Reveal>
+      </Panel>
+
       <Panel id="principle">
         <Reveal>
           <Kicker>Operating principle</Kicker>
@@ -143,7 +181,7 @@ export default function HomePage() {
             second, and write the paper third. That discipline is the pipeline. RC is where
             it is applied. Direction 1 is the first study.
           </p>
-          <div className="mt-8 border border-[var(--rule)] bg-[var(--tint)] p-5 max-w-[62ch]">
+          <div className="mt-8 max-w-[62ch] rounded-2xl border border-[var(--rule)] bg-[var(--tint)] p-5">
             <div className="tag">Paper 1 one-liner</div>
             <p
               className="mt-2 !mb-0 text-[1.25rem] leading-snug"

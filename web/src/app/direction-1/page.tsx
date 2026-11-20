@@ -5,6 +5,7 @@ import { Panel, Kicker } from "@/components/Section";
 import { Reveal, Stagger, StaggerItem } from "@/components/Reveal";
 import { InterventionPlayground } from "@/components/direction1/InterventionPlayground";
 import { ExplanationGrid } from "@/components/direction1/ExplanationGrid";
+import { ModelInternals } from "@/components/ModelInternals";
 import {
   contribution,
   gapPoints,
@@ -66,6 +67,18 @@ export default function Direction1Page() {
           <Kicker>W · S · P</Kicker>
           <h2>Intervention playground</h2>
           <InterventionPlayground />
+        </Reveal>
+      </Panel>
+
+      <Panel id="internals">
+        <Reveal>
+          <Kicker>Model internals</Kicker>
+          <h2>Change the hypothesis. Watch the network move.</h2>
+          <p className="lede">
+            Layers, a tiny circuit, and neuron activations respond as you switch stories —
+            copy W, recompute from S, trust P, routing, or correctness gating.
+          </p>
+          <ModelInternals />
         </Reveal>
       </Panel>
 
