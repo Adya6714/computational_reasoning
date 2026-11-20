@@ -28,6 +28,13 @@ const layers = [
     blurb:
       "Paper 1 on error propagation — after a model writes a wrong intermediate value, what does the next step actually use: W, S, or P?",
   },
+  {
+    href: "/atlas",
+    n: "04",
+    title: "Model Atlas",
+    blurb:
+      "Explore Qwen3-8B architecture in 3D, inspect demo neurons, follow candidate circuits, and walk a toy computational experiment.",
+  },
 ];
 
 const floats = [

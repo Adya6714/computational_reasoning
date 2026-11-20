@@ -76,7 +76,9 @@ export default function Direction1Page() {
           <h2>Change the hypothesis. Watch the network move.</h2>
           <p className="lede">
             Layers, a tiny circuit, and neuron activations respond as you switch stories —
-            copy W, recompute from S, trust P, routing, or correctness gating.
+            copy W, recompute from S, trust P, routing, or correctness gating. For the full
+            3D atlas of Qwen3-8B architecture, circuits, and experiment views, open{" "}
+            <Link href="/atlas">the Model Atlas</Link>.
           </p>
           <ModelInternals />
         </Reveal>

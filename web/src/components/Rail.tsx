@@ -8,10 +8,15 @@ const links = [
   { href: "/pipeline", label: "Research pipeline" },
   { href: "/programme", label: "RC programme" },
   { href: "/direction-1", label: "Direction 1" },
+  { href: "/atlas", label: "Model Atlas" },
 ];
 
 export function Rail() {
   const pathname = usePathname();
+
+  if (pathname.startsWith("/atlas")) {
+    return null;
+  }
 
   return (
     <>
