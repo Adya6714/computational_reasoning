@@ -19,7 +19,7 @@ const layers = [
     n: "02",
     title: "RC programme",
     blurb:
-      "Reasoning Computation: four pillars, thirteen directions, an evidence ladder, and a clear separation from RvC and RR.",
+      "Reasoning Computation: four pillars, thirteen directions, a late-2026 validity check, one shared toy task, and a clear separation from RvC and RR.",
   },
   {
     href: "/direction-1",
@@ -140,6 +140,13 @@ export default function HomePage() {
               <strong className="text-[var(--ink)]">What this programme adds.</strong> A
               causally tested account of intermediate computational state — representation,
               updating, failure, recovery — starting with a sharply bounded first study.
+            </p>
+            <p>
+              <strong className="text-[var(--ink)]">Still open in late 2026.</strong> Frontier
+              models still drop intermediate steps, and scaling does not say which state
+              the next step uses. Open-weight models are where that account can change
+              the system.{" "}
+              <Link href="/programme#validity">The validity check</Link>
             </p>
           </div>
 

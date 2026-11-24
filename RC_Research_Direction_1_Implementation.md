@@ -1,16 +1,17 @@
 # RC Research Direction 1: Implementation Checklist and Technical Specification
 
-**Study:** Research Direction 1 (Paper 1): what does the next dependent step use after a model writes its own wrong intermediate value?
+**Study:** Research Direction 1 (Paper 1): what does the next dependent step use after a model writes its own wrong intermediate value, and use it for a targeted fix that improves accuracy on established benchmarks. Held-out benchmark never used while designing the fix. Report effects on previously-correct items.
 **Repository:** `reasoning-computation`
 **PI:** Adya Srivastava
 **Date:** 20 November 2026
+**Revised:** 24 November 2026. PI decisions of 23–24 November 2026: Direction 1 goal includes a targeted fix; model chosen by Phase 1 screen; generator validation, parser audit, build order and compute. See the programme document's Decision log (24 Nov 2026).
 **Companion file:** `RC_Research_Programme.md` (programme, motivation, directions, and Direction 1's scientific case)
 
 **How to use this file**
 - **Part 1, step-by-step checklist:** what we create, in order, from repository setup to the advisor decision. Cursor builds from it. Every step has outputs and acceptance tests.
 - **Part 2, technical specification:** the exact definitions Part 1 implements: symbols, token roles, interventions, controls, metric, eligibility and statistics. If Part 1 and Part 2 disagree, Part 2 wins until the PI approves a change.
 
-**Status:** nothing has been run. Phases 0 and 1 (programme foundation, plus benchmark, model and tooling audits) may start now. Pipeline code waits for the Phase 1 exit gate. Any GPU use needs explicit PI authorization.
+**Status:** a pipeline smoke run has been done; no model hosted on GPU yet; no internals inspected. Programme Stage 1 (scope all directions) and the Direction 1 Phase 1 audits may proceed. Pipeline code for reported runs waits for the Phase 1 exit gate. Any GPU use needs explicit PI authorization. A cost estimate is provided before each run.
 
 ---
 
@@ -23,13 +24,15 @@
    2. Benchmark review
    3. Tool review
    4. Model review
-   5. Research-direction selection
+   5. Research-direction selection (or Stage 1 ranking: OPEN whether Direction 1 stays first)
    6. Paper 1 design freeze for the pilot
-   7. Implementation and GPU pilot
-   8. Advisor review
-2. **What may happen now.** Creating the repository and README; programme documents; benchmark, model and tool audits (reading code, licences and papers); small CPU-level compatibility tests.
+   7. Build all code first (generators, solvers, verifiers, scorers, parser, intervention code)
+   8. Smoke test on CPU/Colab
+   9. JarvisLabs for every reported run
+   10. Advisor review
+2. **What may happen now.** Creating the repository and README; programme documents; benchmark, model and tool audits (reading code, licences and papers); small CPU-level compatibility tests; completing the remaining pipeline code and CPU/Colab smoke tests. Colab/CPU for debugging only.
 3. **What needs your explicit authorization first.**
-   - Any GPU time: compatibility tests on the 8B model, behavioural yield screening, the pilot itself.
+   - Any GPU time. JarvisLabs for every reported run. Pause GPU instances when idle. Cost estimate before each run.
    - Any choice of dataset source, primary model or intervention framework.
 4. **Nothing in Phases 0 to 2 is a result.** The pilot is a proof of concept. It can show feasibility, surface interesting patterns and expose design failures. It cannot establish generality or statistical significance.
 5. **Every phase ends with a written decision** in `docs/experiment_decisions.md` (date, decision, evidence, approver).
@@ -96,7 +99,7 @@ recorded in docs/reuse_register.md (source, version, modifications, validation).
 ## Status
 - Programme foundation and benchmark/model/tool audits in progress.
 - Methodology: versioned working design. Not frozen.
-- No experiments run. GPU runs require PI authorization.
+- A pipeline smoke run has been done; no model hosted on GPU yet; no internals inspected. GPU runs require PI authorization.
 ```
 
 ### 1.3 Second commit: skeleton
@@ -197,7 +200,7 @@ These are groupings over the A to M taxonomy, not replacements. **Note:** M appe
 
 ### 2.4 Phase 0 exit
 - Programme document updated; matrix and map committed.
-- Research Direction 1 is confirmed as the first study, or replaced. Decision recorded.
+- Research Direction 1 is confirmed as the first study, or it competes in Stage 1 ranking (OPEN). Decision recorded.
 
 ---
 
@@ -212,10 +215,13 @@ These are groupings over the A to M taxonomy, not replacements. **Note:** M appe
 | Candidate | Proposed role | Proposed RC use | Main open question |
 |---|---|---|---|
 | DSR-Bench (reported as PMLR v306) | Structural / data-structure reasoning | Derive stack, queue, tree, graph and state-update problems; track which previous state each operation consumes | Do its task grammar and traces support single-position interventions? |
-| BeyondBench (reported as ICLR 2026, with public code) | Procedurally generated algorithmic and constraint tasks | Find task types with meaningful intermediate mistakes; derive fresh instances with exact ground truth | Do outputs expose a clear sequence of intermediate state transitions? |
+| BeyondBench (reported as ICLR 2026, with public code; incl. Hard Suite) | Procedurally generated algorithmic and constraint tasks | Find task types with meaningful intermediate mistakes; derive fresh instances with exact ground truth | Do outputs expose a clear sequence of intermediate state transitions? |
 | PlanBench / ACPBench | Planning and control flow (Pillar II) | Dependency tracking, subgoals, state transitions, backtracking, stopping | Different computational regime; states and actions instead of values, so W/S/P needs redefining |
-| Variable-scope / assignment-chain tasks (incl. Kudo et al.-style and F2) | Controlled computational state | Direct fit to the W/S/P design | Risk of a "toy task" critique; closeness to Kudo et al. |
+| Variable-scope / assignment-chain tasks (incl. Kudo et al.-style and F2) | Controlled computational state | Direct fit to the W/S/P design. **Candidate only, not decided.** | Risk of a "toy task" critique; closeness to Kudo et al. |
 | GSM8K / MATH / AIME | External validation | Check whether controlled findings show up in natural maths; source of error types | Contamination, variable formats, hard token-level dependency annotation |
+| HardcoreLogic | Pending audit | Pending audit | Pending audit |
+| Reasoning Gym tasks | Pending audit | Pending audit | External generators get the same validation audit as our own. A published audit found material defects in 13 of 105 Reasoning Gym generators |
+| GSM-Symbolic | Pending audit | Pending audit | Pending audit |
 
 **Audit checklist** (one section per benchmark in `Benchmark_Audit.md`):
 1. **Primary source verified:** paper, venue, version, date checked.
@@ -249,26 +255,23 @@ These are groupings over the A to M taxonomy, not replacements. **Note:** M appe
 - fresh seeds;
 - provenance.
 
-**Decision needed (open):** which reasoning type the first experiments study. The options are structural/algorithmic, difficult mathematical, planning/constraint, or a broader comparison first. The proposal leans toward the broader comparison. If it is chosen, the audit scores all three categories against the checklist above before the dataset source is picked. Proposed starting hypothesis (not approved): derive the first dataset from DSR-Bench plus controlled variable-dependency tasks, using BeyondBench to find harder algorithmic families.
+**Decision needed (open):** dataset source after the benchmark audit (G3). Programme P1 (which reasoning type first) is retired as likely moot under Stage 1: benchmarks may differ per direction. Variable/assignment chains remain a candidate only, not decided. Proposed starting hypothesis (not approved): derive the first dataset from DSR-Bench plus controlled variable-dependency tasks, using BeyondBench to find harder algorithmic families.
 
 ### 3.2 Model review and compatibility matrix
 
-**Selection criteria.** Do not choose a model only because it performs poorly. It must:
-1. make enough natural errors to yield eligible events;
-2. run with reproducible settings;
-3. expose activations at the needed positions and layers;
-4. support the chosen intervention tooling;
-5. have enough reasoning ability to produce meaningful multi-step traces.
+The working model is chosen by a Phase 1 model screen on audited benchmark items. There is no primary model until that screen is done.
 
-**Candidates (not an approved roster):**
+**Must-haves.** (1) open weights + activation access, (2) reproducible, (3) enough natural errors, (4) parseable reasoning, (5) intervention tooling works, (6) fits budget (A100 40/80GB), (7) fine-tunable/editable.
+
+**Nice-to-haves** (PI top-3 priority: OPEN). (8) existing SAEs/transcoders, (9) thinking on/off in same weights, (10) open training data, (11) multi-size family, (12) recency, (13) standard architecture, (14) number tokenization.
+
+**Candidates for the Phase 1 screen** (not an approved roster):
 
 | Model | Proposed role |
 |---|---|
-| Qwen3-8B | Primary Paper 1 candidate (as in design v1.1), if runtime and activation access are verified |
-| Qwen3-4B | Smaller comparison; cheaper pilot; checks if the task is too easy |
-| Gemma-2-2B | Independent-family candidate for learning and validating intervention code |
-| OLMo 3 | Training-dynamics candidate for a later study |
-| Qwen3-14B | Scale-up after the pipeline is validated |
+| Qwen3.5 (0.8B / 2B / 4B / 9B) | Hybrid Gated DeltaNet family. Required for direction M |
+| Gemma 3 (270M / 1B / 4B / 12B / 27B) | Standard architecture; Gemma Scope 2 SAEs/transcoders on every layer. Required for direction M. 27B is a family member, not a planned run on this budget |
+| Olmo 3 7B | Fully open data and checkpoints. Required for direction K |
 
 **`Model_Compatibility_Matrix.csv` columns:**
 `model, revision, params, licence, thinking_toggle, chat_template_verified, digits_single_token, loads_in_framework, residual_hook_points, cache_at_positions_ok, identity_patch_zero, all_layer_clamp_ok, peak_mem_gb_at_max_ctx, tokens_per_s, replay_fidelity_ok, behavioural_yield_estimate, notes, tested_on, git_commit`
@@ -342,7 +345,7 @@ Compatibility depends on the version and the architecture. Test the exact model,
 | Optional readout diagnostics in the pilot | Each tied to a named question |
 | Part 2 specification v1.2 | S10, S11 and S13 updated to match the above; PI-approved |
 
-No Paper 1 pipeline code is written before this gate passes.
+Reported GPU runs wait for this gate. Remaining pipeline code may be written and smoke-tested on CPU/Colab. Build all code first; JarvisLabs only for reported runs.
 
 ---
 
@@ -388,7 +391,7 @@ Default to rewriting anything that touches RC definitions (role map, events, int
 
 ### 4.4 Build steps
 
-Hardware: develop and unit-test with a small model on CPU or Colab. Use the same architecture family as the pilot model where possible, so hook points match. Use JarvisLabs GPU only for authorized pilot runs.
+**Build order.** Build all code first (generators, solvers, verifiers, scorers, parser, intervention code) → smoke test on CPU/Colab → JarvisLabs for every reported run. Colab/CPU for debugging only. Pause GPU instances when idle. Use the same architecture family as the screened model where possible, so hook points match.
 
 **Step 1: Schemas, config, logging.**
 - **Build:**
@@ -406,7 +409,7 @@ Hardware: develop and unit-test with a small model on CPU or Colab. Use the same
   - Injectivity and collision metadata per operation.
   - Provenance link to each source instance.
   - Duplicate check across splits.
-- **Tests:** solvers agree on 10,000 items; seed reproducibility; source-fact spans correct; injectivity flags correct.
+- **Tests:** two independent solvers agree on 100% of items; seed reproducibility; source-fact spans correct; injectivity flags correct. Property tests, scorer tests and generator validation as in Part 2, S10.1.
 
 **Step 3: Templates and tokenizer checks.**
 - **Build:** a prompt template that makes the model write explicit intermediate steps in a fixed format, in both thinking-on and thinking-off modes.
@@ -659,7 +662,7 @@ Seeds used in any phase are retired from later phases.
 
 ## S10. Datasets and task construction
 
-**Status:** the dataset source is decided by the benchmark audit (Part 1, S3.1). F2 below is one candidate, kept here as the reference design. Whatever source is chosen must meet the constraints listed in this section.
+**Status:** the dataset source is decided by the benchmark audit (Part 1, S3.1). F2 below is one candidate, kept here as the reference design. Variable/assignment chains are a candidate only, not decided. Whatever source is chosen must meet the constraints listed in this section. External generators get the same validation audit as our own.
 
 | Dataset | Role | Design | Factors |
 |---|---|---|---|
@@ -671,25 +674,32 @@ Seeds used in any phase are retired from later phases.
 **Construction constraints.**
 - Values are single digits so each value is one token (verified per tokenizer).
 - Source and written-value interventions are one-token substitutions.
-- Every item is checked by two independent reference solvers; the solvers must agree on 10,000 generated items.
+- Ground truth only from code. Every item is checked by two independent reference solvers; the solvers must agree on 100% of items.
 - The generator records, for each operation, whether it is injective (one-to-one) over digits mod 10. Addition and subtraction mod 10 are injective; multiplication is injective only by 1, 3, 7 or 9. This metadata drives the collision rule in S15.
 - Null client (random digits) and echo client (repeats last number) must behave as specified.
 - Duplicate items are checked across all splits.
 
+### S10.1 Validation of task generators (24 Nov 2026)
+
+- **Ground truth only from code.** Two independent solvers must agree on 100% of items.
+- **Property tests:** determinism, no duplicates, value ranges, no ambiguous names, tokenization recorded.
+- **Scorer tests:** accepts correct; rejects all wrong variants; no crash on malformed input; planted-defect set.
+- **Versions:** frozen and hashed generator versions. One regression test per bug found.
+- **LLM role:** bug-finder only, never a label source. Run via Cursor agent or a separate Claude chat. No paid API calls. Prompt versioned at `validation/prompts/bugfind_v1.md`.
+- **Log.** Every flag is logged in `validation/llm_bugfind_log.csv` with columns: `date, generator_version, reviewer, prompt_version, file_reviewed, flagged_issue, severity, verified_by, verdict, fix_commit, regression_test_id`.
+- A flag counts as a bug only when reproduced by a failing test. False alarms stay logged.
+- External generators (including Reasoning Gym) get this same audit. A published audit found material defects in 13 of 105 Reasoning Gym generators.
+
 ## S11. Models and decoding
 
-**Status:** the pilot uses one checkpoint, chosen from the model compatibility matrix (Part 1, S3.2). The table below is the current candidate plan.
+**Status:** the pilot uses one checkpoint, chosen by a Phase 1 model screen on audited benchmark items (Part 1, S3.2). The table below is the screen roster, not an approved primary.
 
 | Model | Role | Status |
 |---|---|---|
-| Qwen3-8B | Primary: mechanism study and same-weights thinking on/off | Approved subject to exact model/config/template/runtime verification |
-| Qwen3-14B | Scale replication | Proposed |
-| Llama-3.1-8B-Instruct | Second family, non-thinking | Proposed |
-| OLMo-3-7B Instruct and Think | Third family; comparison with Dalton | Proposed |
-| Second same-weights thinking family | Mode replication | Open; candidate not verified |
-| Qwen3.6 (27B dense or 35B-A3B) | RQ0 behavioural check; no patching claims | Approved as separate check |
-| GLM-5.3, Kimi K3 | Frontier behavioural natural-versus-injected comparison | Deferred |
-| Small same-family model (e.g. a smaller Qwen3 checkpoint) | Pipeline development and unit testing only | No scientific use; never reported as evidence |
+| Qwen3.5 (0.8B / 2B / 4B / 9B) | Hybrid Gated DeltaNet family; required for direction M | Screen candidate |
+| Gemma 3 (270M / 1B / 4B / 12B / 27B) | Standard architecture; Gemma Scope 2 SAEs/transcoders on every layer; required for direction M | Screen candidate. 27B not a planned run on this budget |
+| Olmo 3 7B | Fully open data and checkpoints; required for direction K | Screen candidate |
+| Small same-family model from the screened family | Pipeline development and unit testing only | No scientific use; never reported as evidence |
 
 **Decoding.** Qwen3 thinking: temperature 0.6, top-p 0.95. Qwen3 non-thinking: temperature 0.7, top-p 0.8. Other models: model-card settings, recorded per run. Exact model revisions, templates, token IDs, decoding settings and execution configurations are logged for every run.
 
@@ -970,7 +980,7 @@ On-policy Qwen3-8B thinking histories, turn by turn; no splicing; the same histo
 | P1 / restatement spans | Token F1 | ≥0.90 with 95% CI |
 | Exclusions | Mode gap | ≤10 percentage points |
 
-100 traces per mode (40 development, 60 held-out) is a feasibility sample. At n = 60, a 0.90 point estimate has a 95% Wilson interval of roughly 0.80 to 0.95, so it cannot by itself show performance above 0.90. Rulebook frozen before annotation; two independent annotators and an adjudicator; aligners revised on development data only.
+Parser audit (24 Nov 2026). Single annotator (PI). Labelling is blind to parser output. About 100 traces. Re-label 30 traces after one week and report intra-rater agreement. The single-annotator limitation is stated in any report that uses these labels. Rulebook frozen before annotation; aligners revised on development data only. D15 (naming annotators and an adjudicator) is unchanged as an open ID for any later confirmatory round.
 
 ### S20.5 Survival analysis
 
@@ -991,7 +1001,9 @@ p^k is a planning approximation only. Test constant per-step propagation (trend 
 
 ### S20.7 Compute constraint
 
-The multi-family, multi-scale design may exceed the ₹10,000 budget. The 8 GPU-hour ceiling for P0 is a hard maximum, not a validated forecast. Pilot runtime measurements feed the end-to-end benchmark.
+The PI manages the ₹10,000 JarvisLabs budget. Reference prices (USD/hr, checked 23 Nov 2026): A100 40GB $0.89 on-demand / $0.79 spot; A100 80GB $1.49 / $0.89; H100 $3.49 / $1.54; billed per second. Rough estimate: one direction done fully (mechanism + fix, 7–9B model) ≈ 10–20 A100-hours. Avoid: debugging on live GPUs, 27B models, RL. Cost estimate provided before each run. Pause GPU instances when idle.
+
+The 8 GPU-hour ceiling for P0 remains a hard maximum for that specific Direction 1 feasibility package, not a validated forecast. Pilot runtime measurements feed the end-to-end benchmark. The multi-family, multi-scale design may still exceed the ₹10,000 budget if attempted.
 
 
 ## S22. Repository and versioning
@@ -1003,7 +1015,7 @@ The multi-family, multi-scale design may exceed the ₹10,000 budget. The 8 GPU-
 
 ## S23. Open implementation decisions (PI)
 
-Programme-level and scientific decisions (P1, P2, D1 to D8) are in the programme document, Section 14.
+Programme-level and scientific decisions (P1 retired; P2; P3; P4–P9; D1 to D8) are in the programme document, Section 14. D1–D16 and G3–G8 below are unchanged.
 
 | ID | Decision | Notes |
 |---|---|---|
@@ -1038,6 +1050,7 @@ Programme-level and scientific decisions (P1, P2, D1 to D8) are in the programme
 | RQ0 | Separate validation track |
 | 8-hour ceiling | Hard maximum; workload unvalidated |
 | P0 / Gate B / confirmatory GPU | Not authorized |
+| PI decisions 23–24 Nov 2026 | Direction 1 goal includes a held-out targeted fix; model by Phase 1 screen; generator validation S10.1; parser audit is single-annotator (PI); build-all-then-smoke-then-JarvisLabs; compute prices and 10–20 A100-hour estimate; status is smoke run only |
 
 
 ---

@@ -2,7 +2,8 @@
 
 **PI:** Adya Srivastava
 **Date:** 20 November 2026
-**Status:** Working programme document. Directions are research territory, not promised papers. Nothing here is a completed experiment or an established finding unless it is cited as published work.
+**Revised:** 24 November 2026. PI decisions of 23–24 November 2026: programme and Direction 1 goals; three-stage structure; task and model selection; compute and build order. Decision log below. Earlier revision, 22 November 2026: §1.1 late-2026 validity check. Earlier revision, 21 November 2026: §4.4 shared toy task illustration.
+**Status:** Working programme document. Directions are research territory, not promised papers. Nothing here is a completed experiment or an established finding unless it is cited as published work. A pipeline smoke run has been done; no model hosted on GPU yet; no internals inspected.
 **Companion file:** `RC_Research_Direction_1_Implementation.md` (step-by-step checklist and technical specification for the first study)
 
 ---
@@ -10,6 +11,8 @@
 # Part A: The programme
 
 ## 1. Motivation and the problem we are trying to solve
+
+**Programme goal.** Find out how language models actually carry out multi-step reasoning inside: how they hold, update and use intermediate results, why errors spread or get corrected, and turn that into models that catch and fix their own mistakes.
 
 Language models can solve problems involving arithmetic, symbolic manipulation, planning and sequential state updates. A correct final answer does not tell us **how** the computation was performed. Two models, or one model on two occasions, can reach the same answer through:
 - systematic computation;
@@ -41,6 +44,44 @@ A wrong answer does not tell us where the computation broke, or why the error pe
 4. Use causal interventions to test whether those representations take part in computation rather than merely correlating with answers.
 5. Reconstruct candidate computational pathways and algorithms.
 6. Test whether mechanism-targeted interventions improve reliability without damaging correct behaviour, and whether effects transfer.
+
+### 1.1 Validity of the programme, late 2026
+
+The problem remains valid for newer frontier models. Intermediate-step errors, cascading mistakes, and unfaithful or decorative reasoning traces are still reported in strong reasoning models and frontier systems, including work from October and November 2026. Scaling and reasoning training have raised accuracy. They have not made a wrong intermediate state a solved object.
+
+The problem has shifted. The obvious failure on a short chain is no longer the main case. The live cases are longer traces, errors that stay quiet, and representations that carry a mistake forward. RC's framing — what is in the state before a line is written, and which wrong values the next step actually uses — is the part this work still treats as open.
+
+**Status of this section.** A validity argument for keeping the programme, not an RC result and not a literature matrix (that matrix is §8). On 22 November 2026 the abstracts of Nguyen et al., Firke & Kannan, and Basu & Chakraborty were read and match the claims attributed to them below. Bansal, Agarwal & Gangwani is identified from the ICML 2026 FAGEN workshop listing; the OpenReview PDF (forum id `5XoSAYPGMT`) returned 403, so its figures are not checked against the paper. The Prefactor piece is a vendor blog. A number taken from an unread PDF or a blog is marked. It is not for a manuscript or an advisor deck until the primary source is read (§8.1).
+
+#### 1.1.1 Evidence that the problem is still live
+
+**Error propagation in reasoning traces.** Nguyen, Pham & Nguyen, *Tracing Error Propagation in Reasoning Language Models*, EMNLP 2026 main (anthology `2026.emnlp-main.1559`). Abstract, read 22 November 2026. Step-level errors are locally predictable from a short window of neighbouring steps, so the trace carries an early warning. Trace-level failure is often not an isolated slip. It comes from a persistent error that started earlier. Recoverable and unrecoverable traces are separated by counterfactual resampling. Unrecoverable traces leave final-step representations that separate from recoverable ones, and the persistent error can be decoded from that final-step representation. The error signal propagates and accumulates. This is the representational half of Direction 1 (A, D, F, G): a mistake is readable, and readability is not yet a test of whether the next step uses it.
+
+**Increasing hazard with step depth.** Firke & Kannan, *When Does Reasoning Age? Survival Analysis of Step-Level Error Hazard in LLM Chains*, EMNLP 2026 main (anthology `2026.emnlp-main.1976`). Abstract, read 22 November 2026. Survival analysis of 18,969 chains, five benchmarks, seven models from 3B to 70B, greedy decoding. A near-universal aging effect: the conditional probability of a reasoning error rises with step depth. The Weibull shape satisfies ρ > 1 in 34 of 35 dataset–model cells. The abstract reports that this holds under informative-censoring adjustment and under a shared-frailty check for problem-level heterogeneity. Raw error rates hide the pattern; the conditional hazard shows it. This is why a 3-step toy chain (§4.4) can illustrate a direction and still be the wrong place to claim the phenomenon. The hazard is a function of depth.
+
+**Amplification after the first error.** Bansal, Agarwal & Gangwani, *Cascading Failure Amplification in Multi-Step LLM Reasoning: Operational Definitions, Trace-Level Diagnostics, and Intervention Analysis*, ICML 2026 FAGEN workshop. Authors and title confirmed from the workshop listing on 22 November 2026. OpenReview forum `5XoSAYPGMT` was not retrieved. **Figures not checked against the PDF.** The validity note, consistent with a public author summary, reports that a prior error raises the chance of a later error by about 3–8× across model families (GPT-4o-mini, Llama-3.1-8B, Qwen-2.5-72B in that summary), that roughly half of post-error steps introduce a new mistake in some evaluations, and that cross-verification helped more than step-level self-checking in the tested settings. Those three figures stay out of any claim until the PDF is read. The qualitative point that is safe to carry now is the one the workshop accepted the paper to make: an earlier mistake changes the error rate of what follows, and the diagnostic has to be at the level of the trace.
+
+**Decorative traces in frontier models.** Basu & Chakraborty, *When AI Shows Its Work, Is It Actually Working?*, arXiv:2603.22816 v1. Abstract and opening, read 22 November 2026. Step-level ablation on ten frontier models, including GPT-5.4, Claude Opus 4.6-R, DeepSeek-V3.2, MiniMax-M2.5 and Kimi-K2.5, across sentiment, mathematics, topic classification and medical QA. For most of those models, removing any individual written step changes the answer less than 17% of the time, and a single step is often enough to recover the answer. On mathematics, smaller models (0.8–8B) show genuine step dependence (55% necessity). Faithfulness is specific to the model and the task: MiniMax-M2.5 and Kimi-K2.5 break the decorative pattern on some domains and not others. A written trace can be accurate and still not be the computation. That is the same distinction Paper 1 draws between the written value and what the next step uses. It is also why "the model wrote a correction" is not a recovery result (see Varma & Singh in §8.2).
+
+**Agents and long traces.** Doughty, *Why Cascading Agent Failures Pass Benchmarks but Wreck Production*, Prefactor blog, 21 November 2026. Not a paper. The post's claim, which matches the programme's reason for wanting solvers and intermediate states (§5.1), is that a benchmark scoring only the final output misses silent propagation: an early wrong step is accepted downstream and becomes load-bearing. The post says leading agents still complete only a minority of realistic multi-step tasks under production-like conditions, and that faults often enter early and are not acted on when later evidence contradicts them. Treat the post as a statement of the production gap, not as a measured result. Its incident anecdotes and percentages are not used here.
+
+#### 1.1.2 What has improved, and what has not
+
+**What has improved.** A reading, not a finding. Scaling, reasoning-specific training, and longer internal deliberation have raised accuracy and removed some brittle short-chain failures. Reasoning models are, in the work above, better placed to re-derive a step than models that only answer. Internal signals do carry information about step correctness in reported cases: neighbouring-step windows and final-step representations in Nguyen et al.; correctness probes that are predictive and not causal in Yuan et al. (§8.2). That is the signal RC is built to test, not a signal RC can yet claim to have found.
+
+**What has not been solved.** Quiet intermediate errors that read as confident. Propagation that spoils the final answer. Written traces that are not load-bearing. The cost of checking only from the outside. Independent 2026 lines still treat these as open, and the interventions they try — probes, process-level checks, step-level evaluation — stop where this programme starts: whether the represented error is the one the computation uses.
+
+#### 1.1.3 Scaling laws, and why the open-weight model is the real problem
+
+**Status.** Programme position, 22 November 2026. Not a finding, and not a claim about market share. Kaplan et al. (2020) and Hoffmann et al. (2022) are the classical pretraining scaling laws; they were not re-read for this revision. The empirical points used below are the ones already checked in §1.1.1.
+
+**What a scaling law actually says.** A pretraining scaling law says that average cross-entropy falls as a power of parameters, data and compute. It is a law about loss. It does not say whether the value written at one step is the value the next step uses, whether a wrong value is recovered, or which component carries the state. Test-time scaling spends more steps or more samples to buy accuracy. That buys depth. Firke & Kannan, on models from 3B to 70B, find the conditional probability of a reasoning error rising with that depth. Basu & Chakraborty find written steps less necessary in frontier models than in small models on mathematics. Scale can lift the final-answer rate while the trace becomes a worse description of the computation. "Scale it" and "let it think longer" are not substitutes for knowing the state.
+
+**The real-world object is the open-weight model.** The models a lab can deploy, fine-tune and run as an agent, and then change, are open-weight. A closed frontier API accepts a prompt and returns text. The only reliability tool that fits it is an external checker, which this programme has already set aside (§1). An open model exposes the activations, accepts a training change, and can take a different architecture. That is the practical next gain: not another point on the loss curve, a model whose intermediate computation can be made reliable because someone is allowed to open it. Qwen, Gemma, OLMo and the open frontier systems already in §1.1.1 and §5.2 are that object. Closed models stay behavioural baselines.
+
+**Why this programme is the way to make them better.** A scaling run does not name the failure. A final-answer benchmark does not either (§1.1.1). What names it is the account RC is built to produce: which intermediate value is represented, which wrong value the next step uses, and which part of the network carries it. That account is what a training change (direction K), a transferred mechanism (J) or an architectural constraint (M) can aim at, instead of touching the whole model and hoping the loss moves. Direction 1 is the first cut of that account, on the error that actually propagates. The long-term stake in §1 — training, mechanisms, architecture, not a wrapper — is how an open model gets better at the failures scale does not remove.
+
+**Where this leaves the programme.** Frontier models have not retired the problem. They have moved it from obvious failures on short chains to longer horizons and to the representation that carries the mistake. Scaling will keep raising accuracy. The computation inside the step stays undescribed, and it gets more expensive as the chain gets longer. The place that description can change a deployed model is the open-weight model. The programme's bet is unchanged: find the error in the state, then test which errors propagate, then use that to train, edit or redesign the model that can be opened.
 
 ## 2. RC and its separation from RvC and RR
 
@@ -153,10 +194,169 @@ The pillars group the A to M directions; they do not replace them. Direction M c
 - **Candidate experiments:** architecture comparisons; context/KV constraints; memory augmentation; targeted architectural ablations.
 - **What we could learn:** which architectural properties support stateful computation.
 
+A concrete question and one tentative experiment for every direction, posed on a single assignment chain, is in §4.4. That section is an illustration of the directions. It is not a result and not a publication task.
+
 ### 4.3 Proposed priority (strategy, not novelty-reviewed)
 - **First:** F, G, D, A. These connect the error event directly to the internal computation. Research Direction 1 sits here.
 - **Second:** B, C, E, H, I, L. These can explain the processes behind the first observations.
 - **Third:** J, K, M. These establish generality, training origins and architectural implications.
+
+### 4.4 One shared toy task (Phase 0 illustrations)
+
+Phase 0 already calls for 2 to 4 tentative experiments per direction (§6). The easiest way to see what each direction would actually do is to run every direction on **one shared toy task**. The point is to show the operation of each direction. It is not to publish.
+
+One toy task is enough to understand the directions. It is not enough to publish on them.
+
+**Status of this section.** Proposed illustration. Not run. No model has been probed, patched or scored on these items. Where a direction did not name an evidence rung, the line "Evidence this illustration can reach" is read off the method it describes, using the ladder in §3. That line is not a result and not an extra experiment.
+
+#### 4.4.1 The shared task
+
+**Prompt.**
+
+```text
+x = 7. y = x + 5. z = y * 2. w = z - 3. What is w? Think step by step.
+```
+
+**Correct trace.** y = 12, z = 24, w = 21.
+
+A solver generates thousands of these with different numbers, operations, depths and names, and knows every correct intermediate value. Every later comparison (a probe target, a stale value, a first wrong line, a recovery) is scored against that solver, not against a model judgement.
+
+The base item is the shared object. Individual directions change one thing about it: a reassignment, a repeated increment, a no-CoT instruction, a constraint, a shuffled order, a renamed variable, or an injected wrong line. The dependency structure stays the thing being studied.
+
+#### 4.4.2 Each direction, one question, one experiment
+
+**A. Representation** (Pillar I; full name in §4.2)
+- **Q.** At the `y =` position, is 12 readable from the model's activations before it writes it?
+- **Do.** Train a linear probe on the value of y, layer by layer. Controls: shuffled labels, and chains where y is copied rather than computed.
+- **Reaches.** Decodability and localization.
+- **Feasibility.** Easy. Small model on a Colab T4.
+- **Catch.** Readable does not mean used.
+- **On the sweep.** Yes. Easy-now set.
+
+**B. State updating** (Pillar II)
+- **Q.** After `x = 7 ... x = 9`, does the model use the new x or the stale one?
+- **Do.** Add reassignments, measure stale-value errors against distance, then patch the activation at the update position.
+- **Evidence this illustration can reach.** Behavioural dependence of stale-value errors on distance. The update-position patch can reach causal involvement. It does not by itself identify a unique route.
+- **Feasibility.** Easy.
+- **Catch.** Guo et al. and Tang et al. are close prior work (see §8.2).
+- **On the sweep.** Yes.
+
+**C. Algorithm selection** (Pillar II)
+- **Q.** For `y = x + 1` repeated k times, does the model step through each line or shortcut to x + k?
+- **Do.** Build items where the two algorithms make different errors (stepping gives off-by-one at one position, shortcutting gives a different pattern), then compare error signatures.
+- **Evidence this illustration can reach.** Behavioural discrimination between two procedures. A computational-role claim needs the signatures to come apart. Candidate algorithms often predict the same final answer, so the item design is the experiment.
+- **Feasibility.** Medium.
+- **Catch.** Candidate algorithms often predict the same output, so this needs carefully designed adversarial items.
+- **On the sweep.** No. Needs the adversarial items before it is informative.
+
+**D. Latent computation** (Pillar I)
+- **Q.** With no CoT ("answer only"), is z = 24 readable at the final position?
+- **Do.** Compare CoT and no-CoT accuracy as chain depth grows, and probe for the intermediate values in no-CoT runs.
+- **Evidence this illustration can reach.** Behavioural (accuracy against depth, with and without CoT) and decodability of intermediates in the no-CoT run. Decodability is not use.
+- **Feasibility.** Easy.
+- **Catch.** Kudo et al. already show single-step parts are solved before the CoT (see §8.2 and §8.5). Do not treat "the intermediate is computed early" as a new claim.
+- **On the sweep.** Yes.
+
+**E. Routing and circuits** (Pillar I)
+- **Q.** Which attention heads carry y's value from its line to the position where z is computed?
+- **Do.** Path patching and attention knockout, then EAP.
+- **Evidence this illustration can reach.** Causal involvement, and computational organization only if a reproducible effect survives the controls in §5.3. Attention knockout alone cannot exclude MLP or residual routes (§8.4).
+- **Feasibility.** Medium to hard. TransformerLens support for Qwen3 is unverified.
+- **Catch.** Only meaningful after A or D gives a reproducible effect.
+- **On the sweep.** No. Tooling and a prior effect both have to exist first.
+
+**F. Error genesis** (Pillar III)
+- **Q.** In a wrong trace, which line is the first wrong one, and was it an arithmetic slip, a copy error or a wrong operation?
+- **Do.** Run about 1,000 chains, align each line to the solver, and build an error taxonomy.
+- **Evidence this illustration can reach.** Behavioural. A taxonomy of first divergences. No internal claim.
+- **Feasibility.** Easy. Inference only.
+- **Relation.** This is also the front end of Direction 1.
+- **On the sweep.** Yes.
+
+**G. Persistence and recovery** (Pillar III)
+- **Q.** Once y is written wrong, does w end up wrong?
+- **Do.** Resample 20 continuations from the wrong line, measure the recovery rate, and compare natural errors with injected ones.
+- **Evidence this illustration can reach.** Behavioural recovery under resampling. Natural and injected errors stay separate arms (§8.4).
+- **Feasibility.** Easy behaviourally.
+- **Catch.** The yield of natural errors. If the model rarely writes a wrong y on this chain, the natural arm is empty and the injected arm cannot stand in for it.
+- **Relation.** This is Direction 1.
+- **On the sweep.** Yes.
+
+**H. Constraints** (Pillar II)
+- **Q.** Given "every variable must stay below 50", does the model keep the rule over 10 steps? Does it notice an injected violation?
+- **Do.** Stated as the question: impose the rule, run chains of about 10 steps, and inject a violation.
+- **Evidence this illustration can reach.** Behavioural maintenance and detection of a stated constraint, if the task can express one.
+- **Feasibility.** Medium.
+- **Catch.** The toy task is too simple for this. It really needs PlanBench or constraint-satisfaction tasks. This is a direct input to decision P1.
+- **On the sweep.** No.
+
+**I. Control flow** (Pillar II)
+- **Q.** If the definitions are given out of order, does the model still compute them in dependency order? Does it know when it is done?
+- **Do.** Shuffle the dependency graph; probe for a stop or next-variable signal.
+- **Evidence this illustration can reach.** Behavioural sensitivity to presentation order. A probe can reach decodability of a candidate stop or next-variable signal. A clean control signal is hard to define, so a positive probe is not yet a control mechanism.
+- **Feasibility.** Medium.
+- **Catch.** A clean "control signal" is hard to define. Like H, this pushes toward planning tasks and is an input to P1.
+- **On the sweep.** No.
+
+**J. Invariance** (Pillar IV)
+- **Q.** Rename x, y, z to apple, river, q7, or write numbers as words. Do accuracy and the A-probe direction still hold?
+- **Do.** Stated as the question: apply those surface changes, remeasure accuracy, and test whether the direction found by the A probe still decodes the value.
+- **Evidence this illustration can reach.** Behavioural invariance on its own. Mechanism transfer only after A exists, and only as a replication of that probe direction.
+- **Feasibility.** Easy behaviourally; medium for mechanism transfer.
+- **Catch.** Needs A done first.
+- **On the sweep.** Yes, at the behavioural and probe level. The mechanism-transfer half waits on A.
+
+**K. Training dynamics** (Pillar IV)
+- **Q.** At which OLMo checkpoint does y become readable, and does that come before the model gets the answers right?
+- **Do.** Sweep the public OLMo intermediate checkpoints.
+- **Evidence this illustration can reach.** Correlational. A checkpoint at which a probe starts to read y, set next to the checkpoint at which answers become correct. That order is not a causal account of how the mechanism formed.
+- **Feasibility.** Medium. Each checkpoint costs compute.
+- **Catch.** Small checkpoints may never solve 3-step chains. A probe that never rises, on a model that never answers, does not time the emergence of anything.
+- **On the sweep.** No. Weak on the current budget.
+
+**L. Metacognition** (Pillar III)
+- **Q.** Before the model writes a line, does a probe predict that the line will be wrong, better than token log-probability does?
+- **Do.** Stated as the question: at the position before the line is written, compare a correctness probe with token log-probability.
+- **Evidence this illustration can reach.** Predictive. A comparison against log-probability. Not a causal claim about monitoring.
+- **Feasibility.** Easy to medium.
+- **Catch.** Yuan et al. found correctness readable but not causal (see §8.2). The comparison also needs enough errors, so it depends on the yield that limits G.
+- **On the sweep.** Yes, as a predictive comparison only.
+
+**M. Architecture** (Pillars II and IV)
+- **Q.** Does a recurrent or state-space model (for example Mamba) of similar size break at a different chain depth? Does limiting the attention window break chains at a predictable depth?
+- **Do.** Stated as the question: compare depth-accuracy curves across an existing model of another architecture, and across a limited attention window. Behavioural only. No training.
+- **Evidence this illustration can reach.** Behavioural. A difference in the depth at which accuracy falls.
+- **Feasibility.** Behavioural only.
+- **Catch.** We can't train our own models, so training-data differences confound every comparison. A depth gap between Qwen and Mamba is not an architectural result until training data is matched, which this programme cannot do.
+- **On the sweep.** No. Weak on the current budget, and confounded even if compute were free.
+
+#### 4.4.3 Feasibility on our setup
+
+| Feasibility on our setup | Directions | Highest evidence level this illustration can reach |
+|---|---|---|
+| Easy now | A, B, D, F, G, J, L | Behavioural, decodability, some causal |
+| Needs richer tasks or tooling | C, E, H, I | Causal, but only after the task or tool is set up |
+| Weak on our budget | K, M | Mostly behavioural or correlational |
+
+"Some causal" in the easy row is B's update-position patch, and only B's. A, D, J and L on this pass are probes or behaviour. F and G are inference and resampling. The easy row is not a licence to claim a circuit.
+
+#### 4.4.4 What this tells us
+
+Author's analysis, 21 November 2026. Not literature-checked. Not a finding.
+
+- All 13 directions can be posed on one task family. That is what "shared infrastructure" means in practice: one solver, one trace format, one set of intermediate values, thirteen questions.
+- About half are cheap and near-term. H and I need planning tasks, which is a real input to the P1 decision. The assignment chain does not become a planning benchmark by adding one constraint sentence.
+- F, G, A and D on this toy task are effectively Direction 1's first half, so the sweep is not a detour around Paper 1. F builds the error taxonomy Direction 1 consumes. G is the behavioural recovery question. A and D ask whether the value, and the latent intermediate, are even readable.
+- One toy task is enough to understand the directions. It is not enough to publish on them.
+
+#### 4.4.5 Proposed next step (open; needs PI approval)
+
+Two options. Neither is approved. Recorded as decision P3 in §14.
+
+1. **Feasibility sweep.** The same ~500 chains, one small model (Qwen3-1.7B or Gemma-2-2B), behavioural and probe level only, for A, B, D, F, G, J and L. Compute: a few T4 GPU-hours by a rough guess, not yet costed. It needs explicit GPU authorization before any job is launched. The sweep does not include path patching, EAP, checkpoint sweeps or architecture comparisons.
+2. **Matrix first, no compute.** Write §4.4 into the direction-matrix CSV from Phase 0, with these questions as the "tentative experiment" column. No GPU.
+
+The choice is the PI's. Neither option starts until P3 is decided. The sweep does not start without a costed estimate and explicit GPU authorization.
 
 ## 5. How the directions will be studied
 
@@ -171,35 +371,61 @@ A **reasoning benchmark** measures whether models solve problems. RC needs **exp
 
 This also reduces memorization and contamination risk.
 
+Datasets are derived from established benchmarks after an audit. Variable/assignment chains are a candidate only. They are not decided. Benchmarks may differ per direction. The source-to-direction table is kept.
+
+The first concrete illustration is the shared assignment chain in §4.4. It shows what each direction would do on one task family. It is not an approved publication task. Directions H and I are not well posed on it; they need planning or constraint tasks (PlanBench, or a constraint-satisfaction source).
+
 **Candidate sources** (to be verified in the benchmark audit; none approved):
 
 | Source | Kind | Likely directions served |
 |---|---|---|
 | DSR-Bench | Data-structure and structural reasoning | A, B, C, F, G, J |
-| BeyondBench | Procedurally generated algorithmic and constraint tasks | C, F, G, H |
+| BeyondBench (incl. Hard Suite) | Procedurally generated algorithmic and constraint tasks | C, F, G, H |
 | PlanBench / ACPBench | Planning: states, actions, prerequisites, goals | H, I, B |
-| Variable-scope / assignment-chain tasks | Controlled computational state | A, B, D, F, G |
+| Variable-scope / assignment-chain tasks | Controlled computational state. Candidate only, not decided. §4.4 is one illustration on this family, not the audited dataset | A, B, D, F, G, and, with the variants in §4.4, C, E, J, K, L, M. H and I only weakly |
 | GSM8K / MATH / AIME | Natural mathematical reasoning (external validation) | F, G, J |
+| HardcoreLogic | Pending audit | Pending audit |
+| Reasoning Gym tasks | Pending audit | Pending audit |
+| GSM-Symbolic | Pending audit | Pending audit |
+
+External generators get the same validation audit as our own. A published audit found material defects in 13 of 105 Reasoning Gym generators. That is a reason for the audit, not a reason to drop the source before it is inspected.
+
+**Generator validation** (full procedure in the implementation file): ground truth only from code; two independent solvers must agree on 100% of items. Property tests, scorer tests, frozen hashed generator versions, and one regression test per bug found. An LLM is a bug-finder only, never a label source. A flag counts as a bug only when reproduced by a failing test.
 
 ### 5.2 Models
-**Selection criteria.** Models are chosen for the research, not for leaderboard rank, and never only because they fail often. A model must:
-1. produce enough natural errors to study;
-2. run reproducibly;
-3. expose activations at the positions and layers needed;
-4. support the intervention tooling;
-5. reason well enough to produce meaningful multi-step traces.
+The working model is chosen by a Phase 1 model screen on audited benchmark items. There is no primary model until that screen is done.
+
+**Must-haves:**
+1. open weights and activation access;
+2. reproducible;
+3. enough natural errors;
+4. parseable reasoning;
+5. intervention tooling works;
+6. fits budget (A100 40/80GB);
+7. fine-tunable / editable.
+
+**Nice-to-haves** (PI top-3 priority: OPEN):
+8. existing SAEs / transcoders;
+9. thinking on/off in the same weights;
+10. open training data;
+11. multi-size family;
+12. recency;
+13. standard architecture;
+14. number tokenization.
 
 **Model tiers:**
 - closed-source frontier models for behavioural baselines;
 - open frontier models;
-- open-weight models with internals access, for all mechanistic work.
+- open-weight models with internals access, for all mechanistic work. §1.1.3: these are also the practical object. A closed model can only be wrapped. An open model is the one whose training, mechanisms and architecture this programme can inform.
 
-**Current candidates for open-weight work:**
-- Qwen3-8B (primary for Direction 1)
-- Qwen3-4B
-- Gemma-2-2B
-- OLMo 3 (training dynamics)
-- Qwen3-14B (scale)
+**Candidates for the Phase 1 screen** (not an approved roster):
+- Qwen3.5 (0.8B / 2B / 4B / 9B; hybrid Gated DeltaNet architecture)
+- Gemma 3 (270M / 1B / 4B / 12B / 27B; Gemma Scope 2 SAEs/transcoders on every layer). 27B is a family member, not a planned run on this budget
+- Olmo 3 7B (fully open data and checkpoints)
+
+**Forced by direction.** K needs Olmo (released training checkpoints). M needs Qwen3.5 and Gemma 3 (hybrid vs standard architecture).
+
+**Phase 0 illustration only, not a model choice.** §4.4.5 names Qwen3-1.7B or Gemma-2-2B for a possible easy-now sweep, and public Olmo intermediate checkpoints for direction K. None of these is authorized, and none replaces the Phase 1 screen.
 
 ### 5.3 Interpretability toolkit (five layers)
 
@@ -215,24 +441,39 @@ This also reduces memorization and contamination risk.
 
 **Rule:** every tool must answer a named scientific question.
 
-## 6. Roadmap
+## 6. Programme structure (three stages)
 
-| Phase | Goal | Outputs |
-|---|---|---|
-| 0. Programme foundation | Consolidate the directions; literature, novelty and feasibility per direction; 2 to 4 tentative experiments per promising direction; shared infrastructure | Charter, direction matrix, literature and novelty map, roadmap |
-| 1. Environments, models, tools | Audit benchmarks, models and interpretability tools; estimate natural-error yield | Benchmark audit, dataset derivation spec, model compatibility matrix, tooling audit |
-| 2. Research Direction 1 | Build and run the first study's 2 to 10 event pilot as a proof of concept | Pipeline, pilot report |
-| 3. Decide | Scale, narrow, move to circuits, pivot, or start a reliability study | Pilot interpretation, decision record, scale-up proposal, advisor deck |
+**Stage 1. Scope all directions.** For each direction A–M: 2–3 questions, light depth only. Behavioural tests plus one quick internal check (a probe or a single patch). Purpose: rank directions, not finish them. Log GPU-hours and ₹ per direction.
+
+**Ranking criteria** (score 1–5 each): signal, novelty, fix potential, cost (GPU + build time), paper potential. Weights: OPEN.
+
+**Directions that need extra Stage 1 build:**
+- H and I: planning / constraint tasks
+- E: attribution patching
+- K: models with released training checkpoints (Olmo)
+- M: hybrid vs standard model comparison (Qwen3.5 vs Gemma 3)
+
+**Stage 2. One direction at a time.** Take the top-ranked direction. Full mechanistic work, then a fix (steering, targeted weight edits, mechanism-targeted LoRA; RL only if tiny), then transfer to a hard benchmark. Then move to the next direction. Within any direction, the fix comes only after a mechanism is located.
+
+**Stage 3. Scaling.** Last, and only for winning directions, if credits remain.
+
+Whether Direction 1 stays first or competes in the Stage 1 ranking is OPEN. The companion implementation file is the Direction 1 technical specification; it is not a licence to skip Stage 1.
 
 **Goal for RC output:** main-track papers at top venues. The number of papers is dictated by results.
 
-The step-by-step plan for Phases 0 to 3 as applied to Direction 1 is in the companion implementation file.
+**Compute (24 Nov 2026).** The PI manages the ₹10,000 JarvisLabs budget. Reference prices (USD/hr, checked 23 Nov 2026): A100 40GB $0.89 on-demand / $0.79 spot; A100 80GB $1.49 / $0.89; H100 $3.49 / $1.54; billed per second. Rough estimate: one direction done fully (mechanism + fix, 7–9B model) ≈ 10–20 A100-hours. Avoid: debugging on live GPUs, 27B models, RL. Cost estimate provided before each run. Build all code first; smoke-test on CPU/Colab; JarvisLabs for every reported run. Pause GPU instances when idle.
+
+**Build order.** Build all code first (generators, solvers, verifiers, scorers, parser, intervention code) → smoke test on CPU/Colab → JarvisLabs for every reported run. Colab/CPU for debugging only.
 
 # Part B: Research Direction 1, error propagation (Paper 1)
 
 **One-line question:** after the model itself writes a wrong intermediate value, what does the next dependent step actually use?
 
-Why this direction first: it sits where representation, computation, state use, error genesis, recovery and causal reliability meet (directions D, F, G, A).
+**Direction 1 goal.** After the model itself writes a wrong intermediate value, what does the next dependent step actually use, and use it for a targeted fix that improves accuracy on established benchmarks.
+
+**Fix requirements.** A held-out benchmark never used while designing the fix. Report effects on previously-correct items. No regressions hidden.
+
+Why this direction is a candidate to go first: it sits where representation, computation, state use, error genesis, recovery and causal reliability meet (directions D, F, G, A). Whether it stays first or competes in Stage 1 ranking is OPEN.
 
 ## 7. Research problem
 
@@ -246,13 +487,15 @@ Why this direction first: it sits where representation, computation, state use, 
 
 These can produce similar outputs while implying different computations. They are not mutually exclusive.
 
-**Research question.** How do incorrect intermediate values causally influence subsequent computation in language models, and what determines whether those errors are propagated or corrected?
+**Research question.** How do incorrect intermediate values causally influence subsequent computation in language models, what determines whether those errors are propagated or corrected, and can that account be used for a targeted fix that improves accuracy on established benchmarks?
 
-**Scope.** A controlled causal investigation of error propagation and recovery in multi-step computation, using programmatically verifiable tasks, model-generated errors, input interventions and activation interventions.
+**Scope.** A controlled causal investigation of error propagation and recovery in multi-step computation, using programmatically verifiable tasks, model-generated errors, input interventions and activation interventions, then a targeted fix evaluated on a held-out benchmark, with effects on previously-correct items reported.
 
 **PI position.** RC keeps the broad ambition of understanding computational mechanisms. Paper 1 is one sharply bounded first problem with a falsifiable question. It does not claim to explain reasoning reliability in general, and its novelty is not yet established.
 
 ## 8. Literature and prior work (summary)
+
+§1.1 is a separate late-2026 validity check on whether the programme problem is still live. It is not part of this matrix, and its unread-PDF figures are not rows here.
 
 ### 8.1 Evidence conventions
 
@@ -351,10 +594,11 @@ Whether correctness gating is the headline or exploratory is an open PI decision
 
 ## 11. Contribution and novelty boundary
 
-**Proposed contribution (if supported).** A causal profile of how later reasoning depends on a model's own naturally generated incorrect intermediate values, through the written value, source information, or internal state formed before writing, and a test of whether that profile predicts which errors propagate or are corrected during free-running reasoning.
+**Proposed contribution (if supported).** A causal profile of how later reasoning depends on a model's own naturally generated incorrect intermediate values, through the written value, source information, or internal state formed before writing, a test of whether that profile predicts which errors propagate or are corrected during free-running reasoning, and a targeted fix that improves accuracy on established benchmarks.
 
 **Contribution hierarchy.**
 - Primary: the causal dependence profile on natural errors plus the replay-to-free-running predictive test.
+- Improvement: a targeted fix after the mechanism is located, evaluated on a held-out benchmark never used while designing the fix, with effects on previously-correct items reported.
 - Methodological: the W/S/P intervention design with explicit validation and controls. (Factorial patching itself is standard causal mediation; the claim is its application and validation here.)
 - Secondary: same-weights thinking comparison; retained-versus-stripped history; slip versus systematic errors.
 - Infrastructure (not a scientific contribution): generators, alignment, intervention tooling, cost estimation.
@@ -369,8 +613,8 @@ Whether correctness gating is the headline or exploratory is an open PI decision
 
 ## 12. How Direction 1 will be tested (summary)
 
-- **Data:** controlled multi-step tasks with exact solvers, derived from established benchmarks after an audit. Each task has explicit intermediate values and dependency graphs.
-- **Model:** one open-weight checkpoint for the pilot (candidate: Qwen3-8B), with same-weights thinking-on/off comparisons later.
+- **Data:** controlled multi-step tasks with exact solvers, derived from established benchmarks after an audit. Each task has explicit intermediate values and dependency graphs. Variable/assignment chains are a candidate only, not decided.
+- **Model:** one open-weight checkpoint for the pilot, chosen by a Phase 1 model screen on audited benchmark items. Same-weights thinking-on/off comparisons later if the screened model supports them.
 - **Events:** the model's own naturally generated wrong intermediate values, kept in full with every exclusion logged.
 - **Interventions:**
   - edit the written value (W);
@@ -382,6 +626,7 @@ Whether correctness gating is the headline or exploratory is an open PI decision
   - free-running continuation (what the model actually does next).
 - **Prediction test:** do the W/S/P dependence measures predict propagation or recovery beyond a behavioural baseline, including the model's own initial preference for the wrong downstream answer?
 - **First milestone:** a 2 to 10 event pilot that validates the pipeline and looks for an early scientific signal, against expectations written down beforehand.
+- **Fix, only after a mechanism is located:** steering, targeted weight edits, or mechanism-targeted LoRA (RL only if tiny). Transfer to a hard, held-out benchmark never used while designing the fix. Report effects on previously-correct items.
 
 Full definitions, intervention tables, controls, metric, eligibility rules and the step-by-step build are in `RC_Research_Direction_1_Implementation.md`.
 
@@ -407,8 +652,15 @@ Full definitions, intervention tables, controls, metric, eligibility rules and t
 
 | ID | Decision | Notes |
 |---|---|---|
-| P1 | Which reasoning type the first experiments study: structural/algorithmic, mathematical, planning/constraint, or a broader comparison first | Current lean: broader comparison |
+| P1 | Which reasoning type the first experiments study: structural/algorithmic, mathematical, planning/constraint, or a broader comparison first | **Retired, 24 Nov 2026, likely moot under Stage 1.** Benchmarks may differ per direction. Kept in the table so earlier notes remain readable |
 | P2 | Primary pillar for direction M (II or IV) | |
+| P3 | Phase 0 next step for the shared toy task (§4.4.5): write the thirteen questions into the direction-matrix CSV now, or specify a feasibility sweep (A, B, D, F, G, J, L; ~500 chains; Qwen3-1.7B or Gemma-2-2B; behavioural and probe level) | Sweep is a rough guess of a few T4 GPU-hours, not costed. GPU use needs explicit authorization. Neither option is approved. Stage 1 now covers light-depth questions per direction |
+| P4 | Ranking-criteria weights for Stage 1 (signal, novelty, fix potential, cost, paper potential) | OPEN |
+| P5 | Whether Direction 1 stays first or competes in the Stage 1 ranking | OPEN |
+| P6 | PI top-3 among model nice-to-haves (items 8–14 in §5.2) | OPEN |
+| P7 | Final model after the Phase 1 screen | OPEN |
+| P8 | Benchmark audit outcome | OPEN |
+| P9 | Novelty reads still outstanding: Dalton (arXiv:2611.13552), Zhu (arXiv:2505.04955), Thought Branches (arXiv:2510.27484) | OPEN |
 | D1 | Is correctness gating the headline contribution of Direction 1 or exploratory (RQ4)? | Gap analysis treats it as central; protocol treats it as exploratory |
 | D2 | Add a "consistency edit" (source edited so the wrong value becomes correct) to test correctness gating with W fixed? | |
 | D3 | Adopt an explicit pre-write hypothesis: for slips the pre-write state carries the correct value; for systematic errors it carries the wrong one? | Follows from Kudo et al. |
@@ -420,10 +672,34 @@ Full definitions, intervention tables, controls, metric, eligibility rules and t
 
 Implementation-level decisions are listed in the companion file (Part 2, S23).
 
+## Decision log (24 Nov 2026)
+
+PI decisions of 23–24 November 2026. This log summarises what changed. The sections above are the source of truth.
+
+1. **Programme goal.** Find out how language models actually carry out multi-step reasoning inside: how they hold, update and use intermediate results, why errors spread or get corrected, and turn that into models that catch and fix their own mistakes.
+2. **Direction 1 goal.** Extended to a targeted fix that improves accuracy on established benchmarks. Held-out benchmark never used while designing the fix. Report effects on previously-correct items. No regressions hidden. Within any direction, the fix comes only after a mechanism is located.
+3. **Programme structure.** Three stages replace the old Phase 0–3 roadmap. Stage 1: 2–3 questions per direction A–M, light depth (behavioural tests + one probe or single patch), rank directions, log GPU-hours and ₹. Ranking criteria 1–5: signal, novelty, fix potential, cost, paper potential; weights OPEN. Extra Stage 1 build: H, I (planning/constraint tasks), E (attribution patching), K (Olmo checkpoints), M (Qwen3.5 vs Gemma 3). Stage 2: one direction at a time, full mechanism then fix then transfer. Stage 3: scaling last, winning directions only, if credits remain.
+4. **Tasks.** Datasets derived from established benchmarks after audit. Variable/assignment chains are a candidate only, not decided. Benchmarks may differ per direction. Source-to-direction table kept. Added pending audit: BeyondBench Hard Suite, HardcoreLogic, Reasoning Gym, GSM-Symbolic. External generators get the same validation audit (published audit: material defects in 13 of 105 Reasoning Gym generators).
+5. **Models.** Chosen by a Phase 1 model screen on audited items. Candidates: Qwen3.5 (0.8B/2B/4B/9B, hybrid Gated DeltaNet), Gemma 3 (270M/1B/4B/12B/27B, Gemma Scope 2), Olmo 3 7B. Must-haves 1–7; nice-to-haves 8–14 with PI top-3 OPEN. K needs Olmo; M needs Qwen3.5 + Gemma 3.
+6. **Generator validation.** Ground truth from code only; two independent solvers agree on 100% of items. Property tests, scorer tests, frozen hashed versions, one regression test per bug. LLM is a bug-finder only, never a label source. Cursor agent or a separate Claude chat; no paid API calls. Prompt versioned at `validation/prompts/bugfind_v1.md`. Log: `validation/llm_bugfind_log.csv`. A flag is a bug only when a failing test reproduces it.
+7. **Parser audit.** Single annotator (PI), labelling blind to parser output, ~100 traces; re-label 30 traces after one week and report intra-rater agreement; single-annotator limitation stated.
+8. **Build order.** All code first → smoke test on CPU/Colab → JarvisLabs for every reported run. Colab/CPU for debugging only. Pause GPU instances when idle.
+9. **Compute.** PI manages the ₹10,000 JarvisLabs budget. Prices checked 23 Nov 2026 (USD/hr): A100 40GB $0.89 / $0.79 spot; A100 80GB $1.49 / $0.89; H100 $3.49 / $1.54; billed per second. One full direction (mechanism + fix, 7–9B) ≈ 10–20 A100-hours. Avoid debugging on live GPUs, 27B models, and RL. Cost estimate before each run.
+10. **Status.** A pipeline smoke run has been done; no model hosted on GPU yet; no internals inspected.
+11. **Open.** P1 retired as likely moot under Stage 1. New: ranking weights (P4), Direction 1 vs Stage 1 ranking (P5), nice-to-have top 3 (P6), final model (P7), benchmark audit (P8), novelty reads Dalton / Zhu / Thought Branches (P9). D1–D16 and G3–G8 unchanged.
+
 
 ## 15. References
 
-Bibliographic details, venues and versions must be rechecked against primary sources before submission. "Checked" means existence and abstract-level match on 20 Nov 2026 only.
+Bibliographic details, venues and versions must be rechecked against primary sources before submission. "Checked" means existence and abstract-level match. The date of the check is given on the entry. Entries with no mark were not re-read for the 22 November 2026 revision.
+
+- Nguyen, Pham & Nguyen (2026). Tracing Error Propagation in Reasoning Language Models. EMNLP 2026 main. https://aclanthology.org/2026.emnlp-main.1559/ *Abstract checked, 22 Nov 2026.*
+- Firke & Kannan (2026). When Does Reasoning Age? Survival Analysis of Step-Level Error Hazard in LLM Chains. EMNLP 2026 main. https://aclanthology.org/2026.emnlp-main.1976/ *Abstract checked, 22 Nov 2026.*
+- Bansal, Agarwal & Gangwani (2026). Cascading Failure Amplification in Multi-Step LLM Reasoning: Operational Definitions, Trace-Level Diagnostics, and Intervention Analysis. ICML 2026 FAGEN workshop. OpenReview forum `5XoSAYPGMT`. *Title and authors checked from the workshop listing, 22 Nov 2026. PDF not retrieved.*
+- Basu & Chakraborty (2026). When AI Shows Its Work, Is It Actually Working? Step-level evaluation reveals that frontier language models frequently bypass their own reasoning. arXiv:2603.22816 v1. *Abstract and opening checked, 22 Nov 2026.*
+- Doughty (2026). Why Cascading Agent Failures Pass Benchmarks but Wreck Production: Step-Level Evaluation Gap. Prefactor blog, 21 Nov 2026. https://prefactor.tech/blog/cascading-failures-step-level-evaluation-gap *Blog, not a paper. Read 22 Nov 2026. Figures not used.*
+- Kaplan et al. (2020). Scaling Laws for Neural Language Models. arXiv:2001.08361. *Named in §1.1.3 as the classical pretraining scaling law. Not re-read on 22 Nov 2026.*
+- Hoffmann et al. (2022). Training Compute-Optimal Large Language Models. arXiv:2203.15556. *Named in §1.1.3 as the Chinchilla scaling law. Not re-read on 22 Nov 2026.*
 
 - Kudo et al. (2026). LLMs Faithfully and Iteratively Compute Answers During CoT: A Systematic Analysis With Multi-step Arithmetics. Findings of EACL 2026. arXiv:2412.01113 v4. *Checked.*
 - Dutta, Singh, Chakrabarti & Chakraborty (2024). How to think step-by-step: A mechanistic understanding of chain-of-thought reasoning. TMLR. arXiv:2402.18312. *Checked.*

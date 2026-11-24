@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { directions, pillars } from "@/data/programme";
+import { toyExperiments } from "@/data/toyTask";
 
 const priorities = [
   { id: 0, label: "All" },
@@ -25,6 +26,7 @@ export function DirectionExplorer() {
   }, [pillar, priority]);
 
   const active = directions.find((d) => d.id === selected) ?? filtered[0];
+  const toy = toyExperiments.find((item) => item.id === active?.id);
 
   return (
     <div>
@@ -104,6 +106,16 @@ export function DirectionExplorer() {
                 <strong className="text-[var(--ink)]">What we could learn.</strong>{" "}
                 {active.learn}
               </div>
+              {toy ? (
+                <div className="mt-4 border-t border-[var(--rule)] pt-3">
+                  <div className="tag">On the shared toy task</div>
+                  <p className="mt-2 !mb-1 font-medium">{toy.question}</p>
+                  <p className="!mb-0 text-[0.88rem] text-[var(--muted)]">{toy.procedure}</p>
+                  <a href="#toy-task" className="mt-2 inline-block text-[0.85rem]">
+                    Open the full illustration →
+                  </a>
+                </div>
+              ) : null}
             </motion.div>
           )}
         </AnimatePresence>

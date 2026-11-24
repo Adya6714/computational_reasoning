@@ -216,6 +216,22 @@ export default function Direction1Page() {
         </div>
       </Panel>
 
+      <Panel id="toy-front">
+        <Reveal>
+          <Kicker>Shared toy task</Kicker>
+          <h2>The front half of this study, on one chain</h2>
+          <p className="lede">
+            F, G, A and D on the shared assignment chain are Direction 1’s first half. F
+            is the error taxonomy this study would consume. G is the recovery question.
+            A and D ask whether the intermediate value is readable at all. The
+            illustration has not been run, and it is not a publication task.
+          </p>
+          <Link href="/programme#toy-task" className="btn primary inline-block !no-underline">
+            Open the shared toy task →
+          </Link>
+        </Reveal>
+      </Panel>
+
       <Panel id="loop">
         <Reveal>
           <Kicker>Full loop</Kicker>
